@@ -51,8 +51,8 @@ export const en: Dictionary = {
     aboutP1:
       "We're a Korean tennis club where everyone can play together, regardless of grade, age, or skill level!",
     aboutP2:
-      "Our regular meetups are every Tuesday, 7–10 PM, at the Muir Tennis Courts (subject to members' schedules).",
-    everyWeek: "Every Tuesday",
+      "Our regular meetups are every Thursday, 7–10 PM, at the Muir Tennis Courts (subject to members' schedules).",
+    everyWeek: "Every Thursday",
     hours: "7–10 PM",
     place: "Muir Tennis Courts",
     instagram: "Follow us on Instagram",
