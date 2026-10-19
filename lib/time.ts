@@ -30,7 +30,7 @@ export function addDays(date: string, days: number): string {
   return toDateString(d);
 }
 
-/** The next Thursday on or after `from` (YYYY-MM-DD). */
+/** The next regular game day (Tuesday) on or after `from` (YYYY-MM-DD). */
 export function nextRegularDay(from: string = todayInPacific()): string {
   const date = parseDate(from);
   const isoDow = date.getUTCDay() || 7; // Mon=1 … Sun=7

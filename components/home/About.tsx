@@ -4,7 +4,7 @@ import { button } from "@/components/ui/styles";
 
 export function About({ t }: { t: Dictionary }) {
   const info = [
-    { icon: "📅", text: t.home.everyThursday },
+    { icon: "📅", text: t.home.everyWeek },
     { icon: "🕖", text: t.home.hours },
     { icon: "📍", text: t.home.place },
   ];

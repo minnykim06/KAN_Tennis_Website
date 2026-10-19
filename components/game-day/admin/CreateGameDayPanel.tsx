@@ -10,7 +10,7 @@ import { GameDayForm, type GameDayValues } from "./GameDayForm";
 import { useFormAction } from "./useFormAction";
 
 /**
- * Moderator panel at the top of Game Day: a one-click "next Thursday" button
+ * Moderator panel at the top of Game Day: a one-click "next Tuesday" button
  * and a full create form prefilled with the regular schedule.
  */
 export function CreateGameDayPanel({ defaults, nextDateLabel }: { defaults: GameDayValues; nextDateLabel: string }) {
@@ -25,7 +25,7 @@ export function CreateGameDayPanel({ defaults, nextDateLabel }: { defaults: Game
         <form onSubmit={quick.onSubmit}>
           <button type="submit" disabled={quick.pending} className={`${button.primary} w-full flex-col !gap-0 sm:w-auto`}>
             <span className="flex items-center gap-2">
-              {quick.pending ? <Spinner /> : "⚡"} {t.mod.createNextThursday}
+              {quick.pending ? <Spinner /> : "⚡"} {t.mod.createNextRegular}
             </span>
             <span className="text-xs font-normal opacity-80">{nextDateLabel} · {t.home.hours} · {t.gameDay.doubles}</span>
           </button>

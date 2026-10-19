@@ -55,7 +55,7 @@ export async function createGameDay(_prev: Prev, formData: FormData): Promise<Ac
   return fail(error) ?? done();
 }
 
-/** One click: next Thursday without a game day, 7–10 PM, Muir Tennis Courts, doubles. */
+/** One click: next Tuesday without a game day, 7–10 PM, Muir Tennis Courts, doubles. */
 export async function createNextRegularGameDay(): Promise<ActionResult> {
   const mod = await getModerator();
   if (!mod) return { ok: false, error: "forbidden" };

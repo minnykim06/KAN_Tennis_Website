@@ -51,8 +51,8 @@ export const en: Dictionary = {
     aboutP1:
       "We're a Korean tennis club where everyone can play together, regardless of grade, age, or skill level!",
     aboutP2:
-      "Our regular meetups are every Thursday, 7–10 PM, at the Muir Tennis Courts (subject to members' schedules).",
-    everyThursday: "Every Thursday",
+      "Our regular meetups are every Tuesday, 7–10 PM, at the Muir Tennis Courts (subject to members' schedules).",
+    everyWeek: "Every Tuesday",
     hours: "7–10 PM",
     place: "Muir Tennis Courts",
     instagram: "Follow us on Instagram",
@@ -111,7 +111,7 @@ export const en: Dictionary = {
   mod: {
     tools: "Moderator tools",
     createGameDay: "Create game day",
-    createNextThursday: "Create next Thursday's game day",
+    createNextRegular: "Create next Tuesday's game day",
     editGameDay: "Edit",
     deleteGameDay: "Delete",
     confirmDeleteGameDay: "Delete this game day and all its matchups?",

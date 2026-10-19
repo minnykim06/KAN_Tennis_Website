@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { formatTime, nextRegularDay, todayInPacific } from "./time";
 
 describe("time helpers", () => {
-  it("finds the next Thursday on or after a date", () => {
-    expect(nextRegularDay("2026-10-18")).toBe("2026-10-22"); // Sun → Thu
-    expect(nextRegularDay("2026-10-22")).toBe("2026-10-22"); // Thu → same day
-    expect(nextRegularDay("2026-10-23")).toBe("2026-10-29"); // Fri → next Thu
-    expect(nextRegularDay("2026-12-30")).toBe("2026-12-31"); // across month end
+  it("finds the next Tuesday on or after a date", () => {
+    expect(nextRegularDay("2026-10-18")).toBe("2026-10-20"); // Sun → Tue
+    expect(nextRegularDay("2026-10-20")).toBe("2026-10-20"); // Tue → same day
+    expect(nextRegularDay("2026-10-21")).toBe("2026-10-27"); // Wed → next Tue
+    expect(nextRegularDay("2026-12-30")).toBe("2027-01-05"); // across year end
   });
 
   it("uses the Pacific date, not UTC", () => {

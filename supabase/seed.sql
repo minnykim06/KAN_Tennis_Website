@@ -16,22 +16,22 @@ insert into public.players (id, name, pin_hash, role) values
 on conflict (id) do nothing;
 
 -- Two game days relative to "today" in San Diego:
---   * last Thursday: singles, completed results
---   * the next Thursday: doubles, results pending
+--   * last Tuesday: singles, completed results
+--   * the next Tuesday: doubles, results pending
 with today as (
   select (now() at time zone 'America/Los_Angeles')::date as d
-), next_thu as (
-  select d + ((4 - extract(isodow from d)::int + 7) % 7) as d from today
+), next_tue as (
+  select d + ((2 - extract(isodow from d)::int + 7) % 7) as d from today
 )
 insert into public.game_days (id, date, start_time, end_time, location, notes, created_by, format)
 select '10000000-0000-0000-0000-000000000001'::uuid, d - 7, '19:00'::time, '22:00'::time, 'Muir Tennis Courts',
-       'Great turnout — thanks everyone!', '00000000-0000-0000-0000-000000000001'::uuid, 'singles' from next_thu
+       'Great turnout — thanks everyone!', '00000000-0000-0000-0000-000000000001'::uuid, 'singles' from next_tue
 union all
 select '10000000-0000-0000-0000-000000000002'::uuid, d,     '19:00'::time, '22:00'::time, 'Muir Tennis Courts',
-       'Bring water. Balls provided.',     '00000000-0000-0000-0000-000000000001'::uuid, 'doubles' from next_thu
+       'Bring water. Balls provided.',     '00000000-0000-0000-0000-000000000001'::uuid, 'doubles' from next_tue
 on conflict (id) do nothing;
 
--- Completed matches (last Thursday)
+-- Completed matches (last Tuesday)
 insert into public.matches (id, game_day_id, player1_id, player2_id, court, result, score) values
   ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '1', 'player1_win', '6-4, 6-3'),
@@ -49,7 +49,7 @@ insert into public.matches (id, game_day_id, player1_id, player2_id, court, resu
    '00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000007', '1', 'player1_win', '7-5, 6-4')
 on conflict (id) do nothing;
 
--- Upcoming doubles matchups (next Thursday, pending)
+-- Upcoming doubles matchups (next Tuesday, pending)
 --   Daniel Lee / 이서연  vs  Jason Choi / Sophia Jung
 --   김민준 / Grace Park  vs  박지호 / 최유나
 insert into public.matches (id, game_day_id, player1_id, partner1_id, player2_id, partner2_id, court) values

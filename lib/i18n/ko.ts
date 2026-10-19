@@ -50,8 +50,8 @@ export const ko = {
     aboutP1:
       "저희는 학년, 나이, 실력 상관 없이 다 같이 테니스를 즐길 수 있는 한인 운동 동아리입니다!",
     aboutP2:
-      "저희의 정규 미팅은 멤버들의 스케줄에 따라 매주 목요일 저녁 7시에서 10시까지, 뮤어 테니스 코트에서 진행됩니다.",
-    everyThursday: "매주 목요일",
+      "저희의 정규 미팅은 멤버들의 스케줄에 따라 매주 화요일 저녁 7시에서 10시까지, 뮤어 테니스 코트에서 진행됩니다.",
+    everyWeek: "매주 화요일",
     hours: "저녁 7시–10시",
     place: "뮤어 테니스 코트",
     instagram: "인스타그램 팔로우하기",
@@ -110,7 +110,7 @@ export const ko = {
   mod: {
     tools: "운영진 도구",
     createGameDay: "게임 데이 만들기",
-    createNextThursday: "다음 목요일 게임 데이 바로 만들기",
+    createNextRegular: "다음 화요일 게임 데이 바로 만들기",
     editGameDay: "수정",
     deleteGameDay: "삭제",
     confirmDeleteGameDay: "이 게임 데이와 모든 대진을 삭제할까요?",

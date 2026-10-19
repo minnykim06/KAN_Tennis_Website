@@ -47,7 +47,7 @@ export async function getPlayerNames(): Promise<Map<string, string>> {
   return new Map((await getPlayers()).map((p) => [p.id, p.name]));
 }
 
-/** The next Thursday (on or after today) that doesn't have a game day yet. */
+/** The next regular game day (Tuesday, on or after today) that doesn't have a game day yet. */
 export async function nextOpenRegularDay(): Promise<string> {
   const today = todayInPacific();
   const { data, error } = await db().from("game_days").select("date").gte("date", today);
