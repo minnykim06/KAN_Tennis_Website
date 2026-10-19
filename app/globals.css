@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/*
+ * KAN Tennis brand theme.
+ * Colors are CSS variables so they can switch between light and night mode:
+ *   - default: follow the device setting (prefers-color-scheme)
+ *   - <html data-theme="light|dark">: the member's own choice (theme cookie)
+ */
+@theme inline {
+  --color-brand: var(--kan-brand); /* filled buttons, header bars (white text on top) */
+  --color-brand-dark: var(--kan-brand-dark);
+  --color-green: var(--kan-green); /* green text, links, borders */
+  --color-green-tint: var(--kan-green-tint);
+  --color-green-line: var(--kan-green-line);
+  --color-ink: var(--kan-ink);
+  --color-muted: var(--kan-muted);
+  --color-page: var(--kan-page);
+  --color-surface: var(--kan-surface); /* cards, inputs, modal */
+  --color-me: var(--kan-me); /* signed-in player's row */
+  --color-gold: #c9a227;
+  --color-silver: #9aa3a8;
+  --color-bronze: #b0703c;
+  --color-gold-ink: var(--kan-gold-ink);
+  --color-silver-ink: var(--kan-silver-ink);
+  --color-bronze-ink: var(--kan-bronze-ink);
+  --color-danger: var(--kan-danger);
+  --color-danger-bg: var(--kan-danger-bg);
+  --color-warn: var(--kan-warn);
+  --color-warn-bg: var(--kan-warn-bg);
+
+  --font-serif: var(--font-cinzel), var(--font-noto-kr), Georgia, serif;
+  --font-sans: var(--font-inter), var(--font-noto-kr), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --kan-brand: #154d2e;
+  --kan-brand-dark: #0e3820;
+  --kan-green: #154d2e;
+  --kan-green-tint: #e8f0ea;
+  --kan-green-line: #cfdfd3;
+  --kan-ink: #1c1f1d;
+  --kan-muted: #5b665f;
+  --kan-page: #ffffff;
+  --kan-surface: #ffffff;
+  --kan-me: #d5e7da;
+  --kan-gold-ink: #8a6d10;
+  --kan-silver-ink: #5f686d;
+  --kan-bronze-ink: #7d4c24;
+  --kan-danger: #b91c1c;
+  --kan-danger-bg: #fef2f2;
+  --kan-warn: #78350f;
+  --kan-warn-bg: #fffbeb;
+}
+
+/* Night mode. Same values twice: chosen explicitly, or inherited from the device. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --kan-brand: #1f6b41;
+  --kan-brand-dark: #185634;
+  --kan-green: #7cc49a;
+  --kan-green-tint: #15241b;
+  --kan-green-line: #2b3f32;
+  --kan-ink: #e4ebe6;
+  --kan-muted: #98a69d;
+  --kan-page: #0a110d;
+  --kan-surface: #111a14;
+  --kan-me: #1d3a28;
+  --kan-gold-ink: #e2c25a;
+  --kan-silver-ink: #c3cbd0;
+  --kan-bronze-ink: #dd9a63;
+  --kan-danger: #f87171;
+  --kan-danger-bg: #3b1414;
+  --kan-warn: #fcd34d;
+  --kan-warn-bg: #3a2a0c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --kan-brand: #1f6b41;
+    --kan-brand-dark: #185634;
+    --kan-green: #7cc49a;
+    --kan-green-tint: #15241b;
+    --kan-green-line: #2b3f32;
+    --kan-ink: #e4ebe6;
+    --kan-muted: #98a69d;
+    --kan-page: #0a110d;
+    --kan-surface: #111a14;
+    --kan-me: #1d3a28;
+    --kan-gold-ink: #e2c25a;
+    --kan-silver-ink: #c3cbd0;
+    --kan-bronze-ink: #dd9a63;
+    --kan-danger: #f87171;
+    --kan-danger-bg: #3b1414;
+    --kan-warn: #fcd34d;
+    --kan-warn-bg: #3a2a0c;
+  }
+}
+
+/* Show the right icon in the theme toggle without waiting for JavaScript. */
+.theme-dark-only {
+  display: none;
+}
+:root[data-theme="dark"] .theme-dark-only {
+  display: inline-flex;
+}
+:root[data-theme="dark"] .theme-light-only {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-dark-only {
+    display: inline-flex;
+  }
+  :root:not([data-theme="light"]) .theme-light-only {
+    display: none;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-green);
+  outline-offset: 2px;
+}
