@@ -109,7 +109,7 @@ async function gameDayFormat(gameDayId: string): Promise<GameFormat | null> {
   return (data?.format as GameFormat | undefined) ?? null;
 }
 
-const MATCH_FIELDS = ["player1_id", "player2_id", "partner1_id", "partner2_id", "court"] as const;
+const MATCH_FIELDS = ["player1_id", "player2_id", "partner1_id", "partner2_id", "court", "note"] as const;
 
 export async function createMatch(_prev: Prev, formData: FormData): Promise<ActionResult> {
   if (!(await getModerator())) return { ok: false, error: "forbidden" };

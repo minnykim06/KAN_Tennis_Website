@@ -128,6 +128,7 @@ export const en: Dictionary = {
     team2: "Team 2",
     selectPlayer: "Select a player",
     court: "Court (optional)",
+    matchNote: "Note (optional)",
     alreadyPlaying: "{names} already has a match this day. You can still add it.",
     editMatch: "Edit matchup",
     deleteMatch: "Remove matchup",

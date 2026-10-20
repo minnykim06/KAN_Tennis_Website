@@ -79,6 +79,7 @@ const matchPlayers = {
   partner1_id: optionalId,
   partner2_id: optionalId,
   court: optionalText(20),
+  note: optionalText(200),
 };
 
 type MatchPlayers = { player1_id: string; player2_id: string; partner1_id: string | null; partner2_id: string | null };

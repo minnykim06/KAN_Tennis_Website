@@ -22,7 +22,7 @@ export const getStandings = cache(async (): Promise<Standing[]> => {
 
 const GAME_DAY_COLUMNS =
   "id, date, start_time, end_time, location, notes, format, created_at, " +
-  "matches (id, game_day_id, player1_id, player2_id, partner1_id, partner2_id, court, result, score, created_at)";
+  "matches (id, game_day_id, player1_id, player2_id, partner1_id, partner2_id, court, note, result, score, created_at)";
 
 /** All game days with their matches, split into upcoming (soonest first) and past (latest first). */
 export const getGameDays = cache(async (): Promise<{ upcoming: GameDay[]; past: GameDay[] }> => {

@@ -62,6 +62,7 @@ export function MatchRow({
           )}
         </p>
       )}
+      {match.note && <p className="mt-2 whitespace-pre-line text-sm text-muted">📝 {match.note}</p>}
       {admin}
     </li>
   );

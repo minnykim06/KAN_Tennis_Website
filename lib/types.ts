@@ -21,6 +21,7 @@ export type Match = {
   partner1_id: string | null;
   partner2_id: string | null;
   court: string | null;
+  note: string | null;
   result: MatchResult;
   score: string | null;
   created_at: string;

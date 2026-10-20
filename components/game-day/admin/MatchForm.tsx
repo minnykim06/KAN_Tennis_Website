@@ -38,6 +38,7 @@ export function MatchForm({
     partner2_id: match?.partner2_id ?? "",
   });
   const [court, setCourt] = useState(match?.court ?? "");
+  const [note, setNote] = useState(match?.note ?? "");
 
   const slots: Slot[] = doubles ? ["player1_id", "partner1_id", "player2_id", "partner2_id"] : ["player1_id", "player2_id"];
   const chosen = slots.map((s) => picked[s]).filter(Boolean);
@@ -97,9 +98,15 @@ export function MatchForm({
         </div>
       )}
 
-      <div className="sm:max-w-[10rem]">
-        <label htmlFor={`${idBase}-court`} className={label}>{t.mod.court}</label>
-        <input id={`${idBase}-court`} name="court" maxLength={20} value={court} onChange={(e) => setCourt(e.target.value)} className={input} />
+      <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
+        <div>
+          <label htmlFor={`${idBase}-court`} className={label}>{t.mod.court}</label>
+          <input id={`${idBase}-court`} name="court" maxLength={20} value={court} onChange={(e) => setCourt(e.target.value)} className={input} />
+        </div>
+        <div>
+          <label htmlFor={`${idBase}-note`} className={label}>{t.mod.matchNote}</label>
+          <input id={`${idBase}-note`} name="note" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} className={input} />
+        </div>
       </div>
 
       {busyNames.length > 0 && (

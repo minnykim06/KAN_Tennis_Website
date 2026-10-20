@@ -127,6 +127,7 @@ export const ko = {
     team2: "2팀",
     selectPlayer: "선수 선택",
     court: "코트 (선택)",
+    matchNote: "메모 (선택)",
     alreadyPlaying: "{names} 선수는 이날 이미 다른 경기가 있습니다. 그래도 추가할 수 있어요.",
     editMatch: "대진 수정",
     deleteMatch: "대진 삭제",
