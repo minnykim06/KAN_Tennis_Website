@@ -67,7 +67,7 @@ npm run build      # production build
 
 ## 6. Promote a player to moderator
 
-Players register themselves on the site. To make someone a moderator, run this in the Supabase **SQL Editor** (names match case-insensitively):
+Players can't create their own accounts; add them with the SQL in **Other admin tasks** below. To make someone a moderator, run this in the Supabase **SQL Editor** (names match case-insensitively):
 
 ```sql
 update players set role = 'moderator' where lower(name) = lower('Player Name');
@@ -84,6 +84,10 @@ The change applies on the player's next page load. There's no need to sign out.
 ### Other admin tasks (SQL Editor)
 
 ```sql
+-- Add a new player (the only way to create an account). Share the password with them; they can change it at My account.
+insert into players (name, pin_hash)
+values ('Player Name', extensions.crypt('temp-password', extensions.gen_salt('bf', 10)));
+
 -- Reset a forgotten password (replace temp-password with the club's default). pgcrypto produces a bcrypt hash the app understands.
 -- On Supabase, pgcrypto lives in the "extensions" schema.
 update players
@@ -100,7 +104,7 @@ update players set failed_attempts = 0, locked_until = null where lower(name) = 
 ## How it works
 
 - **Sign-in:** name + password (at least 4 characters; the column is named `pin_hash` for historical reasons). Passwords are hashed with bcrypt. The session is a signed JWT in an httpOnly cookie, valid for 60 days. After 5 wrong passwords, an account is locked for 15 minutes.
-- **Passwords:** new members choose their own when they register. Anyone signed in can change theirs at **My account** (`/account`, tap your name in the navbar) by entering the current password plus the new one twice; wrong current passwords count toward the same lockout. Each session cookie carries a fingerprint of the password hash, so changing a password (or resetting it with the SQL below) signs out every other device.
+- **Passwords:** a moderator sets a starting password when adding a player with SQL. Anyone signed in can change theirs at **My account** (`/account`, tap your name in the navbar) by entering the current password plus the new one twice; wrong current passwords count toward the same lockout. Each session cookie carries a fingerprint of the password hash, so changing a password (or resetting it with the SQL below) signs out every other device.
 - **Roles:** `member` (default) or `moderator`. Every moderator action re-checks the role in the database on the server, so hiding buttons is not the only protection.
 - **Singles / doubles:** each game day is one or the other (new ones default to doubles). A doubles matchup is Team 1 (`player1` + `partner1`) vs Team 2 (`player2` + `partner2`). A game day's format can't change once it has matchups.
 - **Rankings** are computed from completed matches on every request ([`lib/ranking.ts`](lib/ranking.ts)) and are never stored. Singles and doubles share one table: in doubles, both winners get the win and both losers get the loss. Win = 5 pts, draw = 3, loss = 1 (playing always earns points, so showing up is rewarded). Ties are broken by **game difference** (games won − games lost, from the entered scores), then wins, then name. Players tied on points, game difference and wins share a rank.
@@ -114,7 +118,7 @@ update players set failed_attempts = 0, locked_until = null where lower(name) = 
 ```
 app/
   page.tsx, rankings/, game-day/   pages
-  actions/auth.ts                  sign in / register / sign out / language
+  actions/auth.ts                  sign in / sign out / language
   actions/game-day.ts              moderator-only mutations
 components/
   home/, rankings/, game-day/      page sections

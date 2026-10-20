@@ -29,10 +29,6 @@ export const passwordSchema = z
 
 export const signInSchema = z.object({ name: nameSchema, password: passwordSchema });
 
-export const registerSchema = z
-  .object({ name: nameSchema, password: passwordSchema, passwordConfirm: z.string() })
-  .refine((v) => v.password === v.passwordConfirm, msg("passwordMismatch"));
-
 export const changePasswordSchema = z
   .object({ currentPassword: z.string(msg("wrongCurrentPassword")).min(1, msg("wrongCurrentPassword")), newPassword: passwordSchema, newPasswordConfirm: z.string() })
   .refine((v) => v.newPassword === v.newPasswordConfirm, msg("passwordMismatch"))
