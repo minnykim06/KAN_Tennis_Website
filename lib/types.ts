@@ -37,6 +37,8 @@ export type GameDay = {
   location: string;
   notes: string | null;
   format: GameFormat;
+  /** Closed by a moderator: members can no longer enter or change scores. */
+  closed: boolean;
   created_at: string;
   matches: Match[];
 };

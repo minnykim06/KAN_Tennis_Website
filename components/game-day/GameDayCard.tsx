@@ -1,8 +1,9 @@
 import { fmt, type Dictionary, type Lang } from "@/lib/i18n";
 import { formatDate, formatTimeRange } from "@/lib/time";
-import { matchPlayers, type GameDay, type Player } from "@/lib/types";
+import { matchPlayers, team1, team2, type GameDay, type Player } from "@/lib/types";
 import { card } from "@/components/ui/styles";
 import { MatchRow } from "./MatchRow";
+import { ScoreEntry } from "./ScoreEntry";
 import { GameDayAdmin } from "./admin/GameDayAdmin";
 import { MatchAdmin } from "./admin/MatchAdmin";
 import { AddMatch } from "./admin/AddMatch";
@@ -10,6 +11,7 @@ import { AddMatch } from "./admin/AddMatch";
 export type GameDayCardProps = {
   gameDay: GameDay;
   names: Record<string, string>;
+  /** The signed-in player's id; any signed-in player can enter scores on open game days. */
   meId?: string;
   lang: Lang;
   t: Dictionary;
@@ -35,6 +37,11 @@ export function GameDayHeading({ gameDay, lang, t }: { gameDay: GameDay; lang: L
       <h3 className="flex flex-wrap items-center gap-x-2 gap-y-1 font-serif text-lg font-semibold text-green sm:text-xl">
         {formatDate(gameDay.date, lang, { long: true })}
         <FormatBadge format={gameDay.format} t={t} />
+        {gameDay.closed && (
+          <span className="rounded-full bg-muted/15 px-2 py-0.5 font-sans text-[11px] font-semibold tracking-wide text-muted">
+            🔒 {t.gameDay.closed}
+          </span>
+        )}
       </h3>
       <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted">
         <span>🕖 {formatTimeRange(gameDay.start_time, gameDay.end_time, lang)}</span>
@@ -45,13 +52,15 @@ export function GameDayHeading({ gameDay, lang, t }: { gameDay: GameDay; lang: L
   );
 }
 
-/** The body of a game day: notes, matchups and (for moderators) editing tools. */
+/** The body of a game day: notes, matchups, score entry and (for moderators) editing tools. */
 export function GameDayBody({ gameDay, names, meId, t, admin }: GameDayCardProps) {
   return (
     <>
       {gameDay.notes && (
         <p className="mt-3 whitespace-pre-line rounded-lg bg-green-tint/60 px-3 py-2 text-sm">{gameDay.notes}</p>
       )}
+
+      {gameDay.closed && <p className="mt-3 text-sm text-muted">🔒 {t.gameDay.closedNote}</p>}
 
       {gameDay.matches.length === 0 ? (
         <p className="mt-4 text-sm text-muted">{t.gameDay.noMatches}</p>
@@ -65,8 +74,18 @@ export function GameDayBody({ gameDay, names, meId, t, admin }: GameDayCardProps
               isMine={!!meId && matchPlayers(match).includes(meId)}
               t={t}
               admin={
-                admin && (
+                admin ? (
                   <MatchAdmin match={match} format={gameDay.format} players={admin.players} dayMatches={gameDay.matches} />
+                ) : (
+                  meId &&
+                  !gameDay.closed && (
+                    <ScoreEntry
+                      match={match}
+                      format={gameDay.format}
+                      side1={team1(match).map((id) => names[id] ?? "?")}
+                      side2={team2(match).map((id) => names[id] ?? "?")}
+                    />
+                  )
                 )
               }
             />

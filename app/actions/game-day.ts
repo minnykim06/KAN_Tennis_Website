@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
-import { getModerator } from "@/lib/auth/session";
+import { getCurrentPlayer, getModerator } from "@/lib/auth/session";
 import { REGULAR_SCHEDULE } from "@/lib/constants";
 import { nextOpenRegularDay } from "@/lib/queries";
 import {
   firstError,
   formatError,
   gameDaySchema,
+  closeGameDaySchema,
   idSchema,
   matchSchema,
   matchUpdateSchema,
@@ -102,6 +103,18 @@ export async function deleteGameDay(_prev: Prev, formData: FormData): Promise<Ac
   return fail(error, data) ?? done();
 }
 
+/** Close a finished game day (members can no longer change scores), or reopen it. */
+export async function setGameDayClosed(_prev: Prev, formData: FormData): Promise<ActionResult> {
+  if (!(await getModerator())) return { ok: false, error: "forbidden" };
+
+  const parsed = closeGameDaySchema.safeParse(fields(formData, "id", "closed"));
+  if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
+
+  const { id, closed } = parsed.data;
+  const { data, error } = await db().from("game_days").update({ closed }).eq("id", id).select("id");
+  return fail(error, data) ?? done();
+}
+
 // --- Matches ----------------------------------------------------------------
 
 async function gameDayFormat(gameDayId: string): Promise<GameFormat | null> {
@@ -153,14 +166,26 @@ export async function deleteMatch(_prev: Prev, formData: FormData): Promise<Acti
   return fail(error, data) ?? done();
 }
 
-/** Set, change or clear (result = "pending") a match result. */
+/**
+ * Set, change or clear (result = "pending") a match result.
+ * Any signed-in player can do this while the game day is open; once a
+ * moderator closes it, only moderators can.
+ */
 export async function setMatchResult(_prev: Prev, formData: FormData): Promise<ActionResult> {
-  if (!(await getModerator())) return { ok: false, error: "forbidden" };
+  const player = await getCurrentPlayer();
+  if (!player) return { ok: false, error: "signInRequired" };
 
   const parsed = resultSchema.safeParse(fields(formData, "id", "result", "score1", "score2"));
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
 
   const { id, result, score } = parsed.data;
+  if (player.role !== "moderator") {
+    const { data: match, error } = await db().from("matches").select("game_days(closed)").eq("id", id).maybeSingle();
+    if (error) return fail(error)!;
+    if (!match) return { ok: false, error: "notFound" };
+    if ((match.game_days as unknown as { closed: boolean } | null)?.closed) return { ok: false, error: "gameDayClosed" };
+  }
+
   const { data, error } = await db()
     .from("matches")
     .update({ result, score: result === "pending" ? null : score })

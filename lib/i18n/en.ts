@@ -96,6 +96,8 @@ export const en: Dictionary = {
     singles: "Singles",
     doubles: "Doubles",
     partner: "Partner: {name}",
+    closed: "Closed",
+    closedNote: "This game day is closed. Scores are final.",
   },
   results: {
     pending: "Pending",
@@ -103,6 +105,10 @@ export const en: Dictionary = {
   },
   mod: {
     tools: "Moderator tools",
+    closeGameDay: "Close game day",
+    reopenGameDay: "Reopen",
+    typeName: "Type a name",
+    noPlayerMatch: "No matching players",
     createGameDay: "Create game day",
     createNextRegular: "Create next Tuesday's game day",
     editGameDay: "Edit",
@@ -179,6 +185,7 @@ export const en: Dictionary = {
     singlesNoPartners: "Singles game days can't have partners.",
     formatLocked: "This game day already has matchups. Remove them before changing the format.",
     forbidden: "Only moderators can do that.",
+    gameDayClosed: "This game day is closed, so scores can no longer be changed. Ask a moderator.",
     notFound: "That item no longer exists. Refresh and try again.",
     duplicateDate: "There's already a game day on that date.",
     generic: "Something went wrong. Please try again.",

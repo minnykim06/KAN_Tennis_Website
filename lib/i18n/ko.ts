@@ -95,6 +95,8 @@ export const ko = {
     singles: "단식",
     doubles: "복식",
     partner: "파트너: {name}",
+    closed: "마감",
+    closedNote: "마감된 게임 데이입니다. 스코어가 확정되었어요.",
   },
   results: {
     pending: "대기",
@@ -102,6 +104,10 @@ export const ko = {
   },
   mod: {
     tools: "운영진 도구",
+    closeGameDay: "게임 데이 마감",
+    reopenGameDay: "다시 열기",
+    typeName: "이름을 입력하세요",
+    noPlayerMatch: "일치하는 선수가 없습니다",
     createGameDay: "게임 데이 만들기",
     createNextRegular: "다음 화요일 게임 데이 바로 만들기",
     editGameDay: "수정",
@@ -178,6 +184,7 @@ export const ko = {
     singlesNoPartners: "단식 게임 데이에는 파트너를 넣을 수 없습니다.",
     formatLocked: "대진이 있는 게임 데이는 경기 방식을 바꿀 수 없습니다. 먼저 대진을 삭제해주세요.",
     forbidden: "운영진만 할 수 있는 작업입니다.",
+    gameDayClosed: "마감된 게임 데이라 스코어를 바꿀 수 없습니다. 운영진에게 문의해주세요.",
     notFound: "항목을 찾을 수 없습니다. 새로고침 후 다시 시도해주세요.",
     duplicateDate: "해당 날짜에 이미 게임 데이가 있습니다.",
     generic: "문제가 발생했습니다. 잠시 후 다시 시도해주세요.",

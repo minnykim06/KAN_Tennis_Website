@@ -128,6 +128,11 @@ export const resultSchema = z
 
 export const idSchema = z.object({ id });
 
+export const closeGameDaySchema = z.object({
+  id,
+  closed: z.enum(["true", "false"], msg("invalidInput")).transform((v) => v === "true"),
+});
+
 /** First zod issue message as an ErrorKey. */
 export function firstError(error: z.ZodError): ErrorKey {
   const message = error.issues[0]?.message;

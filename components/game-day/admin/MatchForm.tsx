@@ -8,6 +8,7 @@ import { button, input, label } from "@/components/ui/styles";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import { matchPlayers, type GameFormat, type Match, type Player } from "@/lib/types";
+import { PlayerPicker } from "./PlayerPicker";
 import { useFormAction } from "./useFormAction";
 
 type Slot = "player1_id" | "partner1_id" | "player2_id" | "partner2_id";
@@ -49,28 +50,18 @@ export function MatchForm({
 
   const idBase = `mf-${match?.id ?? gameDayId}`;
   const select = (slot: Slot, text: string) => (
-    <div key={slot}>
-      <label htmlFor={`${idBase}-${slot}`} className={label}>{text}</label>
-      <select
-        id={`${idBase}-${slot}`}
-        name={slot}
-        required
-        value={picked[slot]}
-        onChange={(e) => setPicked({ ...picked, [slot]: e.target.value })}
-        className={input}
-      >
-        <option value="" disabled>
-          {t.mod.selectPlayer}
-        </option>
-        {players.map((p) => (
-          // A player already chosen in another slot can't be picked again.
-          <option key={p.id} value={p.id} disabled={p.id !== picked[slot] && chosen.includes(p.id)}>
-            {p.name}
-            {busy.has(p.id) ? " •" : ""}
-          </option>
-        ))}
-      </select>
-    </div>
+    <PlayerPicker
+      key={slot}
+      id={`${idBase}-${slot}`}
+      name={slot}
+      label={text}
+      players={players}
+      value={picked[slot]}
+      onChange={(playerId) => setPicked((prev) => ({ ...prev, [slot]: playerId }))}
+      taken={chosen.filter((id) => id !== picked[slot])}
+      busy={busy}
+      autoFocus={!match && slot === "player1_id"}
+    />
   );
 
   return (

@@ -19,6 +19,7 @@ In the Supabase dashboard, open **SQL Editor → New query**:
    - [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) creates the `players`, `game_days` and `matches` tables.
    - [`supabase/migrations/0002_doubles.sql`](supabase/migrations/0002_doubles.sql) adds singles/doubles game days.
    - [`supabase/migrations/0003_match_notes.sql`](supabase/migrations/0003_match_notes.sql) adds an optional note to each matchup.
+   - [`supabase/migrations/0004_close_game_days.sql`](supabase/migrations/0004_close_game_days.sql) lets moderators close finished game days.
 2. *(Optional, for sample data)* Paste [`supabase/seed.sql`](supabase/seed.sql) and **Run**. This adds 8 players, last Tuesday's singles game day with results, and next Tuesday's doubles game day with matchups.
    - Every sample player's password is **`1234`**.
    - **Daniel Lee** is a moderator, so you can try the moderator tools.
