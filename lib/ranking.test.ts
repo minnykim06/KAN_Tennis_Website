@@ -14,7 +14,7 @@ const byName = (standings: ReturnType<typeof computeRankings>) =>
 
 describe("computeRankings", () => {
   describe("points", () => {
-    it("awards 5 for a win, 3 for a draw, 1 for a loss", () => {
+    it("awards 3 for a win, 2 for a draw, 1 for a loss", () => {
       const s = byName(
         computeRankings(players("A", "B", "C"), [
           m("A", "B", "player1_win"),
@@ -22,9 +22,9 @@ describe("computeRankings", () => {
           m("C", "A", "player2_win"),
         ]),
       );
-      expect(s.A).toMatchObject({ played: 2, wins: 2, draws: 0, losses: 0, points: 10 });
-      expect(s.B).toMatchObject({ played: 2, wins: 0, draws: 1, losses: 1, points: 4 });
-      expect(s.C).toMatchObject({ played: 2, wins: 0, draws: 1, losses: 1, points: 4 });
+      expect(s.A).toMatchObject({ played: 2, wins: 2, draws: 0, losses: 0, points: 6 });
+      expect(s.B).toMatchObject({ played: 2, wins: 0, draws: 1, losses: 1, points: 3 });
+      expect(s.C).toMatchObject({ played: 2, wins: 0, draws: 1, losses: 1, points: 3 });
     });
 
     it("rewards playing: a loss still beats not playing", () => {
@@ -35,7 +35,7 @@ describe("computeRankings", () => {
 
     it("credits player2 wins to player2", () => {
       const s = byName(computeRankings(players("A", "B"), [m("A", "B", "player2_win")]));
-      expect(s.B.points).toBe(5);
+      expect(s.B.points).toBe(3);
       expect(s.A.points).toBe(1);
     });
 
@@ -93,7 +93,7 @@ describe("computeRankings", () => {
       const s = byName(
         computeRankings(players("A", "B"), [m("A", "B", "player1_win"), m("A", "B", "player1_win", "retired")]),
       );
-      expect(s.A).toMatchObject({ wins: 2, points: 10, gamesWon: 0, gamesLost: 0, gameDiff: 0 });
+      expect(s.A).toMatchObject({ wins: 2, points: 6, gamesWon: 0, gamesLost: 0, gameDiff: 0 });
     });
   });
 
@@ -104,7 +104,7 @@ describe("computeRankings", () => {
     });
 
     it("breaks equal points by game difference", () => {
-      // All on 5 pts with 1 win.  B won 6-0 (+6), C won 6-4 (+2), A won 7-6 (+1).
+      // All on 3 pts with 1 win.  B won 6-0 (+6), C won 6-4 (+2), A won 7-6 (+1).
       const r = computeRankings(players("A", "B", "C", "X"), [
         m("A", "X", "player1_win", "7-6"),
         m("B", "X", "player1_win", "6-0"),
@@ -112,14 +112,14 @@ describe("computeRankings", () => {
       ]);
       const top = r.filter((s) => s.name !== "X");
       expect(top.map((s) => [s.name, s.points, s.gameDiff, s.rank])).toEqual([
-        ["B", 5, 6, 1],
-        ["C", 5, 2, 2],
-        ["A", 5, 1, 3],
+        ["B", 3, 6, 1],
+        ["C", 3, 2, 2],
+        ["A", 3, 1, 3],
       ]);
     });
 
     it("puts game difference ahead of W–L record", () => {
-      // Same points (6). A: 1W 1L but +5 games.  B: 2 draws, 0 games.
+      // Same points (4). A: 1W 1L but +5 games.  B: 2 draws, 0 games.
       const r = computeRankings(players("A", "B", "X"), [
         m("A", "X", "player1_win", "6-0"),
         m("A", "X", "player2_win", "5-6"),
@@ -130,7 +130,7 @@ describe("computeRankings", () => {
     });
 
     it("breaks equal points and game difference by wins", () => {
-      // No scores, so game diff is 0 for both.  A: 1W 1L = 6 pts.  B: 2D = 6 pts.  → A (more wins) first
+      // No scores, so game diff is 0 for both.  A: 1W 1L = 4 pts.  B: 2D = 4 pts.  → A (more wins) first
       const r = computeRankings(players("A", "B", "X"), [
         m("A", "X", "player1_win"),
         m("A", "X", "player2_win"),
@@ -156,16 +156,15 @@ describe("computeRankings", () => {
   describe("shared ranks", () => {
     it("gives tied players the same rank and skips the next rank (1, 1, 3)", () => {
       const r = computeRankings(players("A", "B", "C", "D"), [
-        m("A", "D", "player1_win", "6-3"),
+        m("A", "C", "player1_win", "6-3"),
         m("B", "D", "player1_win", "6-3"),
-        m("C", "D", "draw", "6-6"),
       ]);
-      // D played three times (2L 1D = 5 pts), so D outscores C (1D = 3 pts).
+      // A and B: 1W, +3 each. C and D: 1L, −3 each.
       expect(r.map((s) => [s.name, s.rank])).toEqual([
         ["A", 1],
         ["B", 1],
+        ["C", 3],
         ["D", 3],
-        ["C", 4],
       ]);
     });
 
@@ -177,7 +176,7 @@ describe("computeRankings", () => {
         m("B", "X", "draw"),
         m("B", "X", "draw"),
       ]);
-      // X played four times and leads; A and B are level on 6 pts.
+      // X played four times and leads; A and B are level on 4 pts.
       const s = byName(r);
       expect(s.A.rank).toBe(2);
       expect(s.B.rank).toBe(3);
@@ -197,15 +196,15 @@ describe("computeRankings", () => {
       const s = byName(
         computeRankings(players("A", "B", "C", "D"), [{ ...d("A", "B", "C", "D", "player2_win"), score: "3-6" }]),
       );
-      expect(s.C).toMatchObject({ played: 1, wins: 1, points: 5, gamesWon: 6, gamesLost: 3, gameDiff: 3 });
-      expect(s.D).toMatchObject({ played: 1, wins: 1, points: 5, gameDiff: 3 });
+      expect(s.C).toMatchObject({ played: 1, wins: 1, points: 3, gamesWon: 6, gamesLost: 3, gameDiff: 3 });
+      expect(s.D).toMatchObject({ played: 1, wins: 1, points: 3, gameDiff: 3 });
       expect(s.A).toMatchObject({ played: 1, losses: 1, points: 1, gamesWon: 3, gamesLost: 6, gameDiff: -3 });
       expect(s.B).toMatchObject({ played: 1, losses: 1, points: 1, gameDiff: -3 });
     });
 
     it("gives all four players a draw", () => {
       const r = computeRankings(players("A", "B", "C", "D"), [d("A", "B", "C", "D", "draw")]);
-      expect(r.every((s) => s.draws === 1 && s.points === 3)).toBe(true);
+      expect(r.every((s) => s.draws === 1 && s.points === 2)).toBe(true);
       expect(r.every((s) => s.rank === 1)).toBe(true);
     });
 
@@ -213,7 +212,7 @@ describe("computeRankings", () => {
       const s = byName(
         computeRankings(players("A", "B", "C", "D"), [d("A", "B", "C", "D", "player1_win"), m("A", "C", "player1_win")]),
       );
-      expect(s.A).toMatchObject({ played: 2, wins: 2, points: 10 });
+      expect(s.A).toMatchObject({ played: 2, wins: 2, points: 6 });
       expect(s.C).toMatchObject({ played: 2, losses: 2 });
     });
 

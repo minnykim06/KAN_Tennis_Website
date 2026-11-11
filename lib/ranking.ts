@@ -27,7 +27,7 @@ export type Standing = {
   rank: number | null;
 };
 
-export const POINTS = { win: 5, draw: 3, loss: 1 } as const;
+export const POINTS = { win: 3, draw: 2, loss: 1 } as const;
 
 // Fixed locale so ordering is deterministic on every server.
 const collator = new Intl.Collator("en", { sensitivity: "base" });

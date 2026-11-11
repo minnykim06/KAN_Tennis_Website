@@ -61,7 +61,7 @@ export const en: Dictionary = {
   },
   rankings: {
     title: "Rankings",
-    subtitle: "Win 5 · Draw 3 · Loss 1",
+    subtitle: "Win 3 · Draw 2 · Loss 1",
     rank: "Rank",
     player: "Player",
     played: "Played",

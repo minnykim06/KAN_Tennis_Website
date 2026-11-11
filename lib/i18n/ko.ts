@@ -60,7 +60,7 @@ export const ko = {
   },
   rankings: {
     title: "랭킹",
-    subtitle: "승 5점 · 무 3점 · 패 1점",
+    subtitle: "승 3점 · 무 2점 · 패 1점",
     rank: "순위",
     player: "선수",
     played: "경기",
