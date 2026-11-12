@@ -284,12 +284,20 @@ function TournamentMatchForm({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
-        <div>
+      {/* minmax(0,1fr) + min-w-0: iOS Safari gives time inputs a minimum width that would overflow the column. */}
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 sm:max-w-sm">
+        <div className="min-w-0">
           <label htmlFor={`${idBase}-time`} className={label}>{t.tournament.startTime}</label>
-          <input id={`${idBase}-time`} type="time" name="start_time" value={time} onChange={(e) => setTime(e.target.value)} className={input} />
+          <input
+            id={`${idBase}-time`}
+            type="time"
+            name="start_time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className={`${input} min-w-0 appearance-none [&::-webkit-date-and-time-value]:text-left`}
+          />
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor={`${idBase}-court`} className={label}>{t.mod.court}</label>
           <input id={`${idBase}-court`} name="court" maxLength={20} value={court} onChange={(e) => setCourt(e.target.value)} className={input} />
         </div>
