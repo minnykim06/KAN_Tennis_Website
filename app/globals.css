@@ -188,6 +188,10 @@ body:has(.bw-theme) {
 body:has(.bw-theme) :focus-visible {
   outline-color: var(--kan-green);
 }
+/* The club logo in the navbar, in black and white. */
+body:has(.bw-theme) header img {
+  filter: grayscale(1);
+}
 /* Let the themed area reach the footer, without a strip of the site background. */
 main:has(> .bw-theme) {
   display: flex;
