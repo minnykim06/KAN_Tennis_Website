@@ -18,7 +18,7 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { button, input, label } from "@/components/ui/styles";
 import { useI18n } from "@/lib/i18n/client";
 import { PAIRS, PARTICIPANTS, TEAMS, getParticipant, partnerFor } from "@/lib/tournament/fall-2026";
-import { MATCH_KINDS, type TournamentMatch, type TournamentMatchKind } from "@/lib/tournament/types";
+import type { TournamentMatch, TournamentMatchKind } from "@/lib/tournament/types";
 import type { MatchResult } from "@/lib/types";
 
 // The same forms as game day (type-to-search players, score boxes, Team 1 /
@@ -170,7 +170,7 @@ function TournamentMatchForm({
 }) {
   const { t } = useI18n();
   const { state, pending, onSubmit } = useFormAction(match ? updateTournamentMatch : createTournamentMatch, onDone);
-  const [kind, setKind] = useState<TournamentMatchKind>(match?.kind ?? initialKind);
+  const kind: TournamentMatchKind = match?.kind ?? initialKind;
   const [picked, setPicked] = useState<Record<Slot, string>>({
     side1_a: match?.side1_a ?? "",
     side1_b: match?.side1_b ?? "",
@@ -182,10 +182,6 @@ function TournamentMatchForm({
   const [time, setTime] = useState(match?.start_time?.slice(0, 5) ?? "");
   const [court, setCourt] = useState(match?.court ?? "");
 
-  const kindText: Record<TournamentMatchKind, string> = {
-    pair: t.tournament.kindPair,
-    special: t.tournament.kindSpecial,
-  };
   const chosen = SLOTS.map((s) => picked[s]).filter(Boolean);
   const idBase = `tm-${match?.id ?? "new"}`;
 
@@ -262,25 +258,8 @@ function TournamentMatchForm({
     <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded-xl border border-green-line bg-surface p-3 sm:p-4">
       {match && <input type="hidden" name="id" value={match.id} />}
 
-      <div>
-        <label htmlFor={`${idBase}-kind`} className={label}>{t.tournament.kind}</label>
-        <select
-          id={`${idBase}-kind`}
-          name="kind"
-          value={kind}
-          onChange={(e) => {
-            setKind(e.target.value as TournamentMatchKind);
-            setPicked({ side1_a: "", side1_b: "", side2_a: "", side2_b: "" });
-          }}
-          className={`${input} sm:max-w-56`}
-        >
-          {MATCH_KINDS.map((k) => (
-            <option key={k} value={k} disabled={k === "special"}>
-              {k === "special" ? `${kindText[k]} (${t.tournament.specialSet})` : kindText[k]}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Only 고정 페어 can be added or edited; 스페셜 페어 matchups are set. */}
+      <input type="hidden" name="kind" value={kind} />
 
       {kind === "pair" ? (
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
