@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isErrorKey, type ErrorKey } from "@/lib/i18n";
+import { isPairOf, isParticipantId } from "@/lib/tournament/fall-2026";
 
 // Every zod message is an i18n ErrorKey, so actions can return it directly.
 const msg = (key: ErrorKey) => ({ message: key });
@@ -138,3 +139,33 @@ export function firstError(error: z.ZodError): ErrorKey {
   const message = error.issues[0]?.message;
   return isErrorKey(message) ? message : "invalidInput";
 }
+
+// --- Fall 2026 tournament ----------------------------------------------------
+
+const participantId = z.string(msg("invalidInput")).refine(isParticipantId, msg("invalidInput"));
+const optionalTime = z
+  .union([z.literal(""), time])
+  .nullable()
+  .optional()
+  .transform((v) => v || null);
+
+const tournamentSides = z
+  .object({
+    kind: z.enum(["pair", "special"], msg("invalidInput")),
+    side1_a: participantId,
+    side1_b: participantId,
+    side2_a: participantId,
+    side2_b: participantId,
+    start_time: optionalTime,
+    court: optionalText(20),
+  })
+  .refine((v) => new Set([v.side1_a, v.side1_b, v.side2_a, v.side2_b]).size === 4, msg("samePlayer"))
+  // Each side is one fixed pair (고정 페어) or one of the set special pairs (스페셜 페어).
+  .refine((v) => isPairOf(v.kind, v.side1_a, v.side1_b) && isPairOf(v.kind, v.side2_a, v.side2_b), msg("notFixedPair"));
+
+export const tournamentMatchSchema = tournamentSides;
+
+export const tournamentInProgressSchema = z.object({
+  id,
+  in_progress: z.enum(["true", "false"], msg("invalidInput")).transform((v) => v === "true"),
+});

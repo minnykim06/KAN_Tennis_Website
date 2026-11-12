@@ -8,7 +8,7 @@ import { button, input, label } from "@/components/ui/styles";
 import { parseScore } from "@/lib/score";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
-import type { GameFormat, Match, MatchResult } from "@/lib/types";
+import type { ActionResult, GameFormat, Match, MatchResult } from "@/lib/types";
 import { useFormAction } from "./useFormAction";
 
 export function ResultForm({
@@ -17,15 +17,18 @@ export function ResultForm({
   side1,
   side2,
   onDone,
+  action = setMatchResult,
 }: {
-  match: Match;
+  match: Pick<Match, "id" | "result" | "score">;
   format: GameFormat;
   side1: string[];
   side2: string[];
   onDone: () => void;
+  /** Defaults to game day results; the tournament page passes its own action with the same fields. */
+  action?: (prev: ActionResult | null, formData: FormData) => Promise<ActionResult>;
 }) {
   const { t } = useI18n();
-  const { state, pending, onSubmit, run } = useFormAction(setMatchResult, onDone);
+  const { state, pending, onSubmit, run } = useFormAction(action, onDone);
   const [result, setResult] = useState<MatchResult>(match.result === "pending" ? "player1_win" : match.result);
   // Scores are stored as "6-0" (Team 1 first); older entries may have extra sets, so take the first.
   const firstSet = match.score ? parseScore(match.score)?.[0] : undefined;
