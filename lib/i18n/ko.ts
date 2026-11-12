@@ -206,6 +206,7 @@ export const ko = {
   errors: {
     teamNameRequired: "팀 이름을 입력해주세요.",
     specialLocked: "스페셜 페어 대진은 확정되어 있어 결과만 입력할 수 있습니다.",
+    blackVsWhite: "1팀은 흑팀 페어, 2팀은 백팀 페어여야 합니다.",
     notFixedPair: "양쪽 모두 정해진 페어여야 합니다 (고정 페어 또는 스페셜 페어).",
     winnerNeedsFinal: "결과는 종료된 경기에만 입력할 수 있습니다.",
     wrongCurrentPassword: "현재 비밀번호가 올바르지 않습니다.",

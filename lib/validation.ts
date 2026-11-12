@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isErrorKey, type ErrorKey } from "@/lib/i18n";
-import { isPairOf, isParticipantId } from "@/lib/tournament/fall-2026";
+import { getParticipant, isPairOf, isParticipantId } from "@/lib/tournament/fall-2026";
 
 // Every zod message is an i18n ErrorKey, so actions can return it directly.
 const msg = (key: ErrorKey) => ({ message: key });
@@ -161,7 +161,12 @@ const tournamentSides = z
   })
   .refine((v) => new Set([v.side1_a, v.side1_b, v.side2_a, v.side2_b]).size === 4, msg("samePlayer"))
   // Each side is one fixed pair (고정 페어) or one of the set special pairs (스페셜 페어).
-  .refine((v) => isPairOf(v.kind, v.side1_a, v.side1_b) && isPairOf(v.kind, v.side2_a, v.side2_b), msg("notFixedPair"));
+  .refine((v) => isPairOf(v.kind, v.side1_a, v.side1_b) && isPairOf(v.kind, v.side2_a, v.side2_b), msg("notFixedPair"))
+  // 흑백전: side 1 is a 흑팀 pair, side 2 a 백팀 pair.
+  .refine(
+    (v) => getParticipant(v.side1_a)?.teamId === "black" && getParticipant(v.side2_a)?.teamId === "white",
+    msg("blackVsWhite"),
+  );
 
 export const tournamentMatchSchema = tournamentSides;
 

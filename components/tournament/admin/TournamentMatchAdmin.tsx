@@ -209,12 +209,13 @@ function TournamentMatchForm({
     const [a, b] = side === 1 ? (["side1_a", "side1_b"] as const) : (["side2_a", "side2_b"] as const);
     setPicked((prev) => ({ ...prev, [a]: pair?.members[0].id ?? "", [b]: pair?.members[1].id ?? "" }));
   }
+  // 1팀 is always a 흑팀 pair, 2팀 always a 백팀 pair.
   const pairSelect = (side: 1 | 2) => {
-    const other = pairOf(side === 1 ? 2 : 1);
+    const team = TEAMS[side === 1 ? 0 : 1];
     return (
       <div>
         <label htmlFor={`${idBase}-pair${side}`} className={label}>
-          {side === 1 ? t.mod.team1 : t.mod.team2}
+          {team.id === "black" ? t.tournament.teamBlack : t.tournament.teamWhite}
         </label>
         <select
           id={`${idBase}-pair${side}`}
@@ -225,14 +226,10 @@ function TournamentMatchForm({
           className={input}
         >
           <option value="">{t.tournament.selectPair}</option>
-          {TEAMS.map((team) => (
-            <optgroup key={team.id} label={team.id === "black" ? t.tournament.teamBlack : t.tournament.teamWhite}>
-              {team.pairs.map((p, i) => (
-                <option key={p.id} value={p.id} disabled={p.id === other}>
-                  {String.fromCharCode(65 + i)} · {p.members[0].name} / {p.members[1].name}
-                </option>
-              ))}
-            </optgroup>
+          {team.pairs.map((p, i) => (
+            <option key={p.id} value={p.id}>
+              {String.fromCharCode(65 + i)} · {p.members[0].name} / {p.members[1].name}
+            </option>
           ))}
         </select>
       </div>

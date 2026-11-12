@@ -207,6 +207,7 @@ export const en: Dictionary = {
   errors: {
     teamNameRequired: "Enter a team name.",
     specialLocked: "Special-pair matchups are set; only their results can be entered.",
+    blackVsWhite: "Side 1 must be a Team Black pair and side 2 a Team White pair.",
     notFixedPair: "Each side must be one of the set pairs (fixed pair or special pair).",
     winnerNeedsFinal: "A result can only be entered for a finished match.",
     wrongCurrentPassword: "Your current password is incorrect.",
