@@ -30,6 +30,10 @@ export type TournamentData = {
   /** False until the 0005 migration has been run: show the roster with nothing else. */
   ready: boolean;
   matches: TournamentMatch[];
+  /** Ended by a moderator: results are final and members can't change them. */
+  ended: boolean;
+  /** False until migration 0007 has been run: the end button can't be used yet. */
+  canEnd: boolean;
 };
 
 export const side1 = (m: TournamentMatch) => [m.side1_a, m.side1_b];

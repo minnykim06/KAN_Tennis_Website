@@ -11,6 +11,7 @@ import {
   tournamentMatchSchema,
   resultSchema,
   tournamentInProgressSchema,
+  tournamentEndedSchema,
 } from "@/lib/validation";
 import type { ActionResult } from "@/lib/types";
 
@@ -35,6 +36,26 @@ function fail(error: PostgrestError | null, rows?: unknown[] | null): ActionResu
   }
   if (rows && rows.length === 0) return { ok: false, error: "notFound" };
   return null;
+}
+
+async function isEnded(): Promise<boolean> {
+  const { data } = await db().from("tournaments").select("ended").eq("id", TOURNAMENT_ID).maybeSingle();
+  return data?.ended === true;
+}
+
+/** End the tournament (results become final for members), or reopen it. */
+export async function setTournamentEnded(_prev: Prev, formData: FormData): Promise<ActionResult> {
+  if (!(await getModerator())) return { ok: false, error: "forbidden" };
+
+  const parsed = tournamentEndedSchema.safeParse(fields(formData, "ended"));
+  if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
+
+  const ended = parsed.data.ended;
+  const now = new Date().toISOString();
+  const { error } = await db()
+    .from("tournaments")
+    .upsert({ id: TOURNAMENT_ID, ended, ended_at: ended ? now : null, updated_at: now });
+  return fail(error) ?? done();
 }
 
 /** 스페셜 페어 matchups are set in advance: only their results can change. */
@@ -96,8 +117,11 @@ export async function deleteTournamentMatch(_prev: Prev, formData: FormData): Pr
  * match back to scheduled.
  */
 export async function setTournamentResult(_prev: Prev, formData: FormData): Promise<ActionResult> {
-  // Like game day: any signed-in player can enter or change a result.
-  if (!(await getCurrentPlayer())) return { ok: false, error: "signInRequired" };
+  // Like game day: any signed-in player can enter or change a result, until a
+  // moderator ends the tournament; after that, only moderators can.
+  const player = await getCurrentPlayer();
+  if (!player) return { ok: false, error: "signInRequired" };
+  if (player.role !== "moderator" && (await isEnded())) return { ok: false, error: "tournamentEnded" };
 
   const parsed = resultSchema.safeParse(fields(formData, "id", "result", "score1", "score2"));
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };

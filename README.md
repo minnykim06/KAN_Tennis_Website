@@ -22,6 +22,7 @@ In the Supabase dashboard, open **SQL Editor → New query**:
    - [`supabase/migrations/0004_close_game_days.sql`](supabase/migrations/0004_close_game_days.sql) lets moderators close finished game days.
    - [`supabase/migrations/0005_tournament.sql`](supabase/migrations/0005_tournament.sql) adds the 2026 Fall tournament tables (matchups and results; 승점 is computed from results). The roster itself is in [`lib/tournament/fall-2026.ts`](lib/tournament/fall-2026.ts).
    - [`supabase/migrations/0006_special_pairs.sql`](supabase/migrations/0006_special_pairs.sql) limits tournament matches to 고정 페어 / 스페셜 페어, adds the five set special-pair matchups, and locks them (only results can change).
+   - [`supabase/migrations/0007_tournament_end.sql`](supabase/migrations/0007_tournament_end.sql) lets moderators end the tournament (members can then no longer change results).
 2. *(Optional, for sample data)* Paste [`supabase/seed.sql`](supabase/seed.sql) and **Run**. This adds 8 players, last Tuesday's singles game day with results, and next Tuesday's doubles game day with matchups.
    - Every sample player's password is **`1234`**.
    - **Daniel Lee** is a moderator, so you can try the moderator tools.

@@ -174,3 +174,7 @@ export const tournamentInProgressSchema = z.object({
   id,
   in_progress: z.enum(["true", "false"], msg("invalidInput")).transform((v) => v === "true"),
 });
+
+export const tournamentEndedSchema = z.object({
+  ended: z.enum(["true", "false"], msg("invalidInput")).transform((v) => v === "true"),
+});

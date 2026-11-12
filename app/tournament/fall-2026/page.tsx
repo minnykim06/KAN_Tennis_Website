@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { MatchBoard } from "@/components/tournament/MatchBoard";
+import { Scoreboard } from "@/components/tournament/Scoreboard";
 import { TeamSection } from "@/components/tournament/TeamCards";
+import { EndTournament } from "@/components/tournament/admin/EndTournament";
 import { getCurrentPlayer } from "@/lib/auth/session";
 import { getI18n } from "@/lib/i18n/server";
-import type { TeamId } from "@/lib/tournament/fall-2026";
+import { PLANNED_PAIR_MATCHES, SPECIAL_MATCHES, type TeamId } from "@/lib/tournament/fall-2026";
 import { getTournamentData } from "@/lib/tournament/queries";
 import { computeTeamPoints, rankPlayersByTeam } from "@/lib/tournament/points";
 
@@ -20,6 +22,7 @@ export default async function Fall2026TournamentPage() {
   const teamNames: Record<TeamId, string> = { black: t.tournament.teamBlack, white: t.tournament.teamWhite };
 
   const teamPoints = computeTeamPoints(data.matches);
+  const done = data.matches.filter((m) => m.status === "final" && m.winner).length;
 
   const sectionTitle = "mb-3 font-serif text-xl font-semibold text-ink";
 
@@ -29,9 +32,21 @@ export default async function Fall2026TournamentPage() {
         <h1 className="font-serif text-3xl font-semibold tracking-wide text-green sm:text-4xl">{t.tournament.title}</h1>
         <p className="mt-1 text-lg font-medium text-ink">{t.tournament.subtitle}</p>
         <p className="mt-2 inline-block rounded-full border border-green-line px-3 py-1 text-sm text-muted">
-          {t.tournament.date}
+          {data.ended ? t.tournament.dateEnded : t.tournament.date}
         </p>
       </header>
+
+      {isModerator && data.ready && <EndTournament ended={data.ended} canEnd={data.canEnd} />}
+
+      <Scoreboard
+        teamNames={teamNames}
+        teamPoints={teamPoints}
+        done={done}
+        total={PLANNED_PAIR_MATCHES + SPECIAL_MATCHES}
+        ended={data.ended}
+        t={t}
+      />
+      {data.ended && <p className="-mt-6 mb-10 text-center text-xs text-muted">{t.tournament.endedNote}</p>}
 
       <section aria-labelledby="teams" className="mb-10">
         <h2 id="teams" className={sectionTitle}>{t.tournament.teamsTitle}</h2>
@@ -45,7 +60,7 @@ export default async function Fall2026TournamentPage() {
           teamNames={teamNames}
           lang={lang}
           canEdit={isModerator && data.ready}
-          canScore={!!player && data.ready}
+          canScore={!!player && data.ready && (!data.ended || isModerator)}
         />
       </section>
     </div>
