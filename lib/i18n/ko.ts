@@ -139,6 +139,7 @@ export const ko = {
     teamPoints: "팀 승점",
     pointsRule: "승점은 종료된 고정 페어·스페셜 페어 경기 결과로 자동 계산됩니다 (승 3점 · 패 1점). 승점이 같으면 게임 득실(딴 게임 − 잃은 게임)이 높은 순입니다.",
     points: "{count}점",
+    selectPair: "페어 선택",
     kind: "종류",
     startTime: "시간 (선택)",
     markInProgress: "진행 중으로 표시",

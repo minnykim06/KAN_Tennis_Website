@@ -140,6 +140,7 @@ export const en: Dictionary = {
     teamPoints: "Team points",
     pointsRule: "Points come from finished fixed-pair and special-pair matches (win 3 · loss 1). Ties are broken by game difference (games won − lost).",
     points: "{count} pts",
+    selectPair: "Select pair",
     kind: "Type",
     startTime: "Time (optional)",
     markInProgress: "Mark in progress",

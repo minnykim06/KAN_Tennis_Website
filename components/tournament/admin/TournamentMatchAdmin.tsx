@@ -17,7 +17,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { button, input, label } from "@/components/ui/styles";
 import { useI18n } from "@/lib/i18n/client";
-import { PARTICIPANTS, getParticipant, partnerFor } from "@/lib/tournament/fall-2026";
+import { PAIRS, PARTICIPANTS, TEAMS, getParticipant, partnerFor } from "@/lib/tournament/fall-2026";
 import { MATCH_KINDS, type TournamentMatch, type TournamentMatchKind } from "@/lib/tournament/types";
 import type { MatchResult } from "@/lib/types";
 
@@ -201,6 +201,48 @@ function TournamentMatchForm({
     setPicked(next);
   }
 
+  // 고정 페어: one pick per side, a whole pair, grouped by team. The two members
+  // fill that side's slots; a pair already on the other side is greyed out.
+  const pairOf = (side: 1 | 2): string => {
+    const a = getParticipant(picked[side === 1 ? "side1_a" : "side2_a"]);
+    const b = getParticipant(picked[side === 1 ? "side1_b" : "side2_b"]);
+    return a && b && a.pairId === b.pairId ? a.pairId : "";
+  };
+  function pickPair(side: 1 | 2, pairId: string) {
+    const pair = PAIRS.find((p) => p.id === pairId);
+    const [a, b] = side === 1 ? (["side1_a", "side1_b"] as const) : (["side2_a", "side2_b"] as const);
+    setPicked((prev) => ({ ...prev, [a]: pair?.members[0].id ?? "", [b]: pair?.members[1].id ?? "" }));
+  }
+  const pairSelect = (side: 1 | 2) => {
+    const other = pairOf(side === 1 ? 2 : 1);
+    return (
+      <div>
+        <label htmlFor={`${idBase}-pair${side}`} className={label}>
+          {side === 1 ? t.mod.team1 : t.mod.team2}
+        </label>
+        <select
+          id={`${idBase}-pair${side}`}
+          value={pairOf(side)}
+          onChange={(e) => pickPair(side, e.target.value)}
+          required
+          autoFocus={!match && side === 1}
+          className={input}
+        >
+          <option value="">{t.tournament.selectPair}</option>
+          {TEAMS.map((team) => (
+            <optgroup key={team.id} label={team.id === "black" ? t.tournament.teamBlack : t.tournament.teamWhite}>
+              {team.pairs.map((p, i) => (
+                <option key={p.id} value={p.id} disabled={p.id === other}>
+                  {String.fromCharCode(65 + i)} · {p.members[0].name} / {p.members[1].name}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
   const select = (slot: Slot, text: string) => (
     <PlayerPicker
       key={`${slot}-${kind}-${filled[slot]}`}
@@ -240,19 +282,31 @@ function TournamentMatchForm({
         </select>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-        <fieldset className="space-y-2 rounded-lg bg-surface/70 p-2.5">
-          <legend className="px-1 text-xs font-semibold text-green">{t.mod.team1}</legend>
-          {select("side1_a", `${t.mod.team1} · 1`)}
-          {select("side1_b", `${t.mod.team1} · 2`)}
-        </fieldset>
-        <span className="text-center text-xs uppercase text-muted">{t.common.vs}</span>
-        <fieldset className="space-y-2 rounded-lg bg-surface/70 p-2.5">
-          <legend className="px-1 text-xs font-semibold text-green">{t.mod.team2}</legend>
-          {select("side2_a", `${t.mod.team2} · 1`)}
-          {select("side2_b", `${t.mod.team2} · 2`)}
-        </fieldset>
-      </div>
+      {kind === "pair" ? (
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+          {/* The pair selects aren't form fields themselves: submit the four player ids. */}
+          {SLOTS.map((slot) => (
+            <input key={slot} type="hidden" name={slot} value={picked[slot]} />
+          ))}
+          {pairSelect(1)}
+          <span className="text-center text-xs uppercase text-muted sm:pb-3">{t.common.vs}</span>
+          {pairSelect(2)}
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+          <fieldset className="space-y-2 rounded-lg bg-surface/70 p-2.5">
+            <legend className="px-1 text-xs font-semibold text-green">{t.mod.team1}</legend>
+            {select("side1_a", `${t.mod.team1} · 1`)}
+            {select("side1_b", `${t.mod.team1} · 2`)}
+          </fieldset>
+          <span className="text-center text-xs uppercase text-muted">{t.common.vs}</span>
+          <fieldset className="space-y-2 rounded-lg bg-surface/70 p-2.5">
+            <legend className="px-1 text-xs font-semibold text-green">{t.mod.team2}</legend>
+            {select("side2_a", `${t.mod.team2} · 1`)}
+            {select("side2_b", `${t.mod.team2} · 2`)}
+          </fieldset>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
         <div>
