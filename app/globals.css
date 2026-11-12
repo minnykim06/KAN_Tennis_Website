@@ -136,46 +136,44 @@ body {
  * app/tournament/fall-2026/layout.tsx wraps the page in .bw-theme, which
  * redefines the same --kan-* variables for its subtree only, so the navbar,
  * footer and every other page keep the club's green theme.
+ * The page looks the same in light and night mode (the theme toggle is hidden
+ * there): a black board with white cards, 흑 and 백.
  */
 .bw-theme {
-  --kan-brand: #171717;
-  --kan-brand-dark: #000000;
-  --kan-green: #171717;
-  --kan-green-tint: #f2f2f2;
-  --kan-green-line: #d4d4d4;
-  --kan-ink: #171717;
-  --kan-muted: #525252;
-  --kan-page: #ffffff;
-  --kan-surface: #ffffff;
-  --kan-me: #e5e5e5;
+  color-scheme: dark;
+  /* On the black page: white accents (active tabs, filled buttons). */
+  --kan-brand: #ffffff;
+  --kan-brand-dark: #e5e5e5;
+  --kan-green: #f5f5f5;
+  --kan-green-tint: #1f1f1f;
+  --kan-green-line: #4a4a4a;
+  --kan-ink: #f5f5f5;
+  --kan-muted: #a3a3a3;
+  --kan-page: #0a0a0a;
+  --kan-surface: #ffffff; /* cards, inputs and forms are white */
+  --kan-me: #262626;
+  --kan-danger: #f87171;
+  --kan-danger-bg: #3b1414;
+  --kan-warn: #fcd34d;
+  --kan-warn-bg: #3a2a0c;
   background: var(--kan-page);
   color: var(--kan-ink);
 }
-:root[data-theme="dark"] .bw-theme {
-  --kan-brand: #404040;
+/* Inside a white card (anything with bg-surface): black on white. */
+.bw-theme .bg-surface {
+  color-scheme: light;
+  --kan-brand: #0a0a0a;
   --kan-brand-dark: #262626;
-  --kan-green: #f5f5f5;
-  --kan-green-tint: #1c1c1c;
-  --kan-green-line: #3f3f3f;
-  --kan-ink: #ededed;
-  --kan-muted: #a3a3a3;
-  --kan-page: #0a0a0a;
-  --kan-surface: #141414;
-  --kan-me: #262626;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .bw-theme {
-    --kan-brand: #404040;
-    --kan-brand-dark: #262626;
-    --kan-green: #f5f5f5;
-    --kan-green-tint: #1c1c1c;
-    --kan-green-line: #3f3f3f;
-    --kan-ink: #ededed;
-    --kan-muted: #a3a3a3;
-    --kan-page: #0a0a0a;
-    --kan-surface: #141414;
-    --kan-me: #262626;
-  }
+  --kan-green: #0a0a0a;
+  --kan-green-tint: #f0f0f0;
+  --kan-green-line: #d4d4d4;
+  --kan-ink: #0a0a0a;
+  --kan-muted: #595959;
+  --kan-danger: #b91c1c;
+  --kan-danger-bg: #fef2f2;
+  --kan-warn: #78350f;
+  --kan-warn-bg: #fffbeb;
+  color: var(--kan-ink);
 }
 /* Let the themed area reach the footer, without a strip of the site background. */
 main:has(> .bw-theme) {

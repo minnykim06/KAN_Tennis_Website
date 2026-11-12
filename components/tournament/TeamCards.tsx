@@ -64,7 +64,7 @@ export function TeamSection({
             aria-controls={`team-panel-${id}`}
             onClick={() => setTab(id)}
             className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === id ? "border-brand bg-brand text-white" : "border-green-line text-ink hover:bg-green-tint"
+              tab === id ? "border-brand bg-brand text-neutral-950" : "border-green-line text-ink hover:bg-green-tint"
             }`}
           >
             {label}

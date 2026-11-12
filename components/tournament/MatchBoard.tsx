@@ -72,7 +72,7 @@ export function MatchBoard({
             aria-controls="match-panel"
             onClick={() => setKind(k)}
             className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-              kind === k ? "border-brand bg-brand text-white" : "border-green-line text-ink hover:bg-green-tint"
+              kind === k ? "border-brand bg-brand text-neutral-950" : "border-green-line text-ink hover:bg-green-tint"
             }`}
           >
             {tabLabel[k]}

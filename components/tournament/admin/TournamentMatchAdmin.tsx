@@ -217,7 +217,7 @@ function TournamentMatchForm({
   );
 
   return (
-    <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded-xl border border-green-line bg-green-tint/40 p-3 sm:p-4">
+    <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded-xl border border-green-line bg-surface p-3 sm:p-4">
       {match && <input type="hidden" name="id" value={match.id} />}
 
       <div>

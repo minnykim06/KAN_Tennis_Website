@@ -1,7 +1,9 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/client";
 import { THEME_COOKIE, type Theme } from "@/lib/theme";
+import { TOURNAMENT_PATH } from "@/lib/tournament/fall-2026";
 
 function currentTheme(): Theme {
   const chosen = document.documentElement.dataset.theme;
@@ -12,9 +14,13 @@ function currentTheme(): Theme {
 /**
  * Switches between light and night mode instantly (no reload) and remembers
  * the choice in a cookie so the server renders the same theme next time.
+ * Hidden on the tournament page, which is always black and white (흑백전).
  */
 export function ThemeToggle() {
   const { t } = useI18n();
+  const pathname = usePathname();
+
+  if (pathname.startsWith(TOURNAMENT_PATH)) return null;
 
   function toggle() {
     const next: Theme = currentTheme() === "dark" ? "light" : "dark";
