@@ -12,6 +12,7 @@ import {
   PARTICIPANTS,
   PLANNED_PAIR_MATCHES,
   SPECIAL_MATCHES,
+  SPECIAL_MATCHUPS,
   TEAMS,
   getParticipant,
   type PairDraw as PairDrawData,
@@ -58,7 +59,7 @@ export function MatchBoard({
   // 고정 페어 matches from the draw in schedule order (1–15).
   const ofKind = matches
     .filter((m) => m.kind === kind)
-    .sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));
+    .sort((a, b) => (matchLabel(a)?.n ?? 99) - (matchLabel(b)?.n ?? 99));
   const visible = ofKind.filter((m) => !player || tournamentMatchPlayers(m).includes(player));
 
   const tabLabel: Record<TournamentMatchKind, string> = {
@@ -139,6 +140,21 @@ export function MatchBoard({
   );
 }
 
+/**
+ * The match's number and pair marks: 고정 페어 1–15 from the draw ("흑A vs 백B"),
+ * 스페셜 페어 16–20 by matchup ("흑1 vs 백1", same numbers as the 스페셜 페어 tab).
+ */
+function matchLabel(m: TournamentMatch): { n: number; b: string; w: string } | null {
+  if (m.kind === "pair") {
+    if (m.slot === null) return null;
+    const [b, w] = PAIR_SCHEDULE[m.slot - 1];
+    return { n: m.slot, b, w };
+  }
+  const i = SPECIAL_MATCHUPS.findIndex((s) => s.black.includes(m.side1_a) && s.white.includes(m.side2_a));
+  if (i === -1) return null;
+  return { n: PLANNED_PAIR_MATCHES + i + 1, b: String(i + 1), w: String(i + 1) };
+}
+
 function TournamentMatchRow({
   match,
   teamNames,
@@ -155,6 +171,7 @@ function TournamentMatchRow({
   canScore: boolean;
 }) {
   const { t } = useI18n();
+  const label = matchLabel(match);
   const winner = match.status === "final" ? match.winner : null;
   const winIdx = winner === "side1" ? 0 : winner === "side2" ? 1 : -1;
   const hasScore = match.score1 !== null && match.score2 !== null;
@@ -169,10 +186,9 @@ function TournamentMatchRow({
   return (
     <li className="rounded-xl border border-green-line bg-surface px-3 py-3 sm:px-4">
       <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
-        {match.slot !== null && (
+        {label && (
           <span className="font-semibold text-ink">
-            {fmt(t.tournament.matchNo, { n: match.slot })} ·{" "}
-            {fmt(t.tournament.matchLetters, { b: PAIR_SCHEDULE[match.slot - 1][0], w: PAIR_SCHEDULE[match.slot - 1][1] })}
+            {fmt(t.tournament.matchNo, { n: label.n })} · {fmt(t.tournament.matchLetters, { b: label.b, w: label.w })}
           </span>
         )}
         <span className={`rounded-full px-2 py-0.5 text-[11px] ${status.cls}`}>{status.text}</span>
