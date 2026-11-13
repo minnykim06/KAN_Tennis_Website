@@ -116,3 +116,38 @@ export function partnerFor(kind: "pair" | "special", id: string): string | undef
   const pair = SPECIAL_PAIRS.find((p) => p.includes(id));
   return pair?.find((x) => x !== id);
 }
+
+// --- 고정 페어 schedule (제비뽑기) --------------------------------------------
+// Each team's pairs draw letters A–E on the day; the 15 matches follow this
+// letter schedule (흑팀 letter vs 백팀 letter), three rounds of five.
+
+export const LETTERS = ["A", "B", "C", "D", "E"] as const;
+export type Letter = (typeof LETTERS)[number];
+
+export const PAIR_SCHEDULE: [Letter, Letter][] = [
+  ["A", "A"], ["B", "B"], ["C", "C"], ["D", "D"], ["E", "E"],
+  ["A", "B"], ["B", "C"], ["C", "D"], ["D", "E"], ["E", "A"],
+  ["A", "C"], ["B", "D"], ["C", "E"], ["D", "A"], ["E", "B"],
+];
+
+/** Letter → pair id for each team, as drawn on the day. */
+export type PairDraw = Record<TeamId, Record<Letter, string>>;
+
+/** Each pair plays exactly PAIR_MATCHES_PER_PAIR times in the schedule. */
+export function isValidDraw(draw: unknown): draw is PairDraw {
+  if (!draw || typeof draw !== "object") return false;
+  return TEAMS.every((team) => {
+    const byLetter = (draw as Record<string, Record<string, string>>)[team.id];
+    if (!byLetter) return false;
+    const ids = LETTERS.map((l) => byLetter[l]);
+    const teamPairs = new Set(team.pairs.map((p) => p.id));
+    return ids.every((id) => teamPairs.has(id)) && new Set(ids).size === LETTERS.length;
+  });
+}
+
+/** The pair id's letter in the draw, if drawn. */
+export function letterOf(draw: PairDraw | null, pairId: string): Letter | undefined {
+  const teamId = getPair(pairId)?.teamId;
+  if (!draw || !teamId) return undefined;
+  return LETTERS.find((l) => draw[teamId][l] === pairId);
+}

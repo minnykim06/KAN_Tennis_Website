@@ -4,7 +4,15 @@ import { revalidatePath } from "next/cache";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { getCurrentPlayer, getModerator } from "@/lib/auth/session";
-import { TOURNAMENT_ID, TOURNAMENT_PATH } from "@/lib/tournament/fall-2026";
+import {
+  LETTERS,
+  PAIR_SCHEDULE,
+  TEAMS,
+  TOURNAMENT_ID,
+  TOURNAMENT_PATH,
+  getPair,
+  isValidDraw,
+} from "@/lib/tournament/fall-2026";
 import {
   firstError,
   idSchema,
@@ -64,6 +72,12 @@ async function isSpecialMatch(id: string): Promise<boolean> {
   return data?.kind === "special";
 }
 
+/** The match's draw slot (1–15), or null for a match that isn't from the draw. */
+async function slotOf(id: string): Promise<number | null> {
+  const { data, error } = await db().from("tournament_matches").select("slot").eq("id", id).maybeSingle();
+  return error ? null : ((data?.slot as number | null | undefined) ?? null);
+}
+
 const MATCH_FIELDS = ["kind", "side1_a", "side1_b", "side2_a", "side2_b", "start_time", "court"] as const;
 
 export async function createTournamentMatch(_prev: Prev, formData: FormData): Promise<ActionResult> {
@@ -85,10 +99,13 @@ export async function updateTournamentMatch(_prev: Prev, formData: FormData): Pr
   if (!id.success) return { ok: false, error: firstError(id.error) };
   if (!parsed.success) return { ok: false, error: firstError(parsed.error) };
   if (parsed.data.kind === "special" || (await isSpecialMatch(id.data.id))) return { ok: false, error: "specialLocked" };
+  // Matches from the draw keep their pairs (change the draw instead): only time and court.
+  const fromDraw = (await slotOf(id.data.id)) !== null;
+  const values = fromDraw ? { start_time: parsed.data.start_time, court: parsed.data.court } : parsed.data;
 
   const { data, error } = await db()
     .from("tournament_matches")
-    .update(parsed.data)
+    .update(values)
     .eq("id", id.data.id)
     .eq("tournament_id", TOURNAMENT_ID)
     .select("id");
@@ -101,6 +118,7 @@ export async function deleteTournamentMatch(_prev: Prev, formData: FormData): Pr
   const id = idSchema.safeParse(fields(formData, "id"));
   if (!id.success) return { ok: false, error: firstError(id.error) };
   if (await isSpecialMatch(id.data.id)) return { ok: false, error: "specialLocked" };
+  if ((await slotOf(id.data.id)) !== null) return { ok: false, error: "scheduleLocked" };
 
   const { data, error } = await db()
     .from("tournament_matches")
@@ -155,4 +173,104 @@ export async function setTournamentInProgress(_prev: Prev, formData: FormData): 
     .neq("status", "final")
     .select("id");
   return fail(error, data) ?? done();
+}
+
+// --- 고정 페어 draw (제비뽑기) ------------------------------------------------
+
+type SlotRow = {
+  id: string;
+  slot: number;
+  side1_a: string;
+  side1_b: string;
+  side2_a: string;
+  side2_b: string;
+  status: string;
+  winner: string | null;
+  score1: number | null;
+};
+
+/**
+ * Save which pair drew which letter (fields `black_A` … `white_E`, pair ids),
+ * then create or update the 15 scheduled 고정 페어 matches to match. Once a
+ * match has a result (or is in progress), its pairs can no longer change.
+ */
+export async function savePairDraw(_prev: Prev, formData: FormData): Promise<ActionResult> {
+  if (!(await getModerator())) return { ok: false, error: "forbidden" };
+
+  const draw = Object.fromEntries(
+    TEAMS.map((team) => [team.id, Object.fromEntries(LETTERS.map((l) => [l, String(formData.get(`${team.id}_${l}`) ?? "")]))]),
+  );
+  if (!isValidDraw(draw)) return { ok: false, error: "invalidDraw" };
+
+  const { data: existing, error: loadError } = await db()
+    .from("tournament_matches")
+    .select("id, slot, side1_a, side1_b, side2_a, side2_b, status, winner, score1")
+    .eq("tournament_id", TOURNAMENT_ID)
+    .not("slot", "is", null);
+  if (loadError) return fail(loadError)!;
+  const bySlot = new Map((existing as SlotRow[]).map((m) => [m.slot, m]));
+
+  const planned = PAIR_SCHEDULE.map(([b, w], i) => {
+    const [s1a, s1b] = getPair(draw.black[b])!.members;
+    const [s2a, s2b] = getPair(draw.white[w])!.members;
+    return { slot: i + 1, side1_a: s1a.id, side1_b: s1b.id, side2_a: s2a.id, side2_b: s2b.id };
+  });
+  const changed = planned.filter((p) => {
+    const m = bySlot.get(p.slot);
+    return m && (m.side1_a !== p.side1_a || m.side1_b !== p.side1_b || m.side2_a !== p.side2_a || m.side2_b !== p.side2_b);
+  });
+  // Moving a played match to other pairs would hand its result to them.
+  const started = (m: SlotRow) => m.status !== "scheduled" || m.winner !== null || m.score1 !== null;
+  if (changed.some((p) => started(bySlot.get(p.slot)!))) return { ok: false, error: "drawLocked" };
+
+  const { error: saveError } = await db()
+    .from("tournaments")
+    .upsert({ id: TOURNAMENT_ID, pair_letters: draw, updated_at: new Date().toISOString() });
+  if (saveError) return fail(saveError)!;
+
+  for (const p of changed) {
+    const { error } = await db()
+      .from("tournament_matches")
+      .update({ side1_a: p.side1_a, side1_b: p.side1_b, side2_a: p.side2_a, side2_b: p.side2_b })
+      .eq("id", bySlot.get(p.slot)!.id);
+    if (error) return fail(error)!;
+  }
+  const missing = planned.filter((p) => !bySlot.has(p.slot));
+  if (missing.length > 0) {
+    const { error } = await db()
+      .from("tournament_matches")
+      .insert(missing.map((p) => ({ tournament_id: TOURNAMENT_ID, kind: "pair", ...p })));
+    if (error) return fail(error)!;
+  }
+  return done();
+}
+
+/**
+ * Clear the draw and delete the 15 matches it created. Refused while any of
+ * them is in progress or has a result, so no score is lost.
+ */
+export async function resetPairDraw(): Promise<ActionResult> {
+  if (!(await getModerator())) return { ok: false, error: "forbidden" };
+
+  const { data, error: loadError } = await db()
+    .from("tournament_matches")
+    .select("id, slot, side1_a, side1_b, side2_a, side2_b, status, winner, score1")
+    .eq("tournament_id", TOURNAMENT_ID)
+    .not("slot", "is", null);
+  if (loadError) return fail(loadError)!;
+  const started = (m: SlotRow) => m.status !== "scheduled" || m.winner !== null || m.score1 !== null;
+  if ((data as SlotRow[]).some(started)) return { ok: false, error: "drawResetLocked" };
+
+  const { error: deleteError } = await db()
+    .from("tournament_matches")
+    .delete()
+    .eq("tournament_id", TOURNAMENT_ID)
+    .not("slot", "is", null);
+  if (deleteError) return fail(deleteError)!;
+
+  const { error } = await db()
+    .from("tournaments")
+    .update({ pair_letters: null, updated_at: new Date().toISOString() })
+    .eq("id", TOURNAMENT_ID);
+  return fail(error) ?? done();
 }

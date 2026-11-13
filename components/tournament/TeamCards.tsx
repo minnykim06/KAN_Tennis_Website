@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
-import { SPECIAL_MATCHUPS, TEAMS, getParticipant, type TeamId } from "@/lib/tournament/fall-2026";
+import { LETTERS, SPECIAL_MATCHUPS, TEAMS, getPair, getParticipant, type PairDraw, type TeamId } from "@/lib/tournament/fall-2026";
 import type { RankedPlayer } from "@/lib/tournament/points";
 import { TEAM_CARD } from "./teamStyle";
 import { MATCH_KINDS, side1, side2, type TournamentMatch } from "@/lib/tournament/types";
@@ -18,13 +18,16 @@ export function TeamSection({
   rankings,
   teamPoints,
   matches,
+  draw,
 }: {
   teamNames: Record<TeamId, string>;
   /** All tournament matches, for each player's drop-down in 개인 순위. */
   matches: TournamentMatch[];
   rankings: Record<TeamId, RankedPlayer[]>;
-  /** Team total: the sum of its pairs' 승점 from fixed-pair matches. */
+  /** Team total: each match adds its side's 승점 to that side's team. */
   teamPoints: Record<TeamId, number>;
+  /** The 제비뽑기: letter → pair per team, or null before it's entered. */
+  draw: PairDraw | null;
 }) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("pairs");
@@ -80,15 +83,20 @@ export function TeamSection({
 
                 {tab !== "rankings" ? (
                   <ol>
-                    {/* 스페셜 페어: row n of 흑팀 plays row n of 백팀. */}
+                    {/* 고정 페어: by drawn letter A–E (roster order, unlettered, before the draw).
+                        스페셜 페어: numbered, row n of 흑팀 plays row n of 백팀. */}
                     {(tab === "pairs"
-                      ? team.pairs.map((pair) => pair.members.map((m) => m.name))
-                      : SPECIAL_MATCHUPS.map((m) => m[team.id].map((id) => getParticipant(id)?.name ?? "?"))
-                    ).map(([a, b], i) => (
+                      ? draw
+                        ? LETTERS.map((l) => ({ mark: l, names: getPair(draw[team.id][l])!.members.map((m) => m.name) }))
+                        : team.pairs.map((pair) => ({ mark: "·", names: pair.members.map((m) => m.name) }))
+                      : SPECIAL_MATCHUPS.map((m, i) => ({
+                          mark: String(i + 1),
+                          names: m[team.id].map((id) => getParticipant(id)?.name ?? "?"),
+                        }))
+                    ).map(({ mark, names: [a, b] }, i) => (
                       <li key={i} className={`flex items-center gap-3 border-t py-2.5 ${style.row}`}>
-                        {/* 고정 페어 are lettered A–E; 스페셜 페어 are numbered so matching rows read as matchups. */}
-                        <Num className={style.num} label={fmt(t.tournament.pairLabel, { n: label(tab, i) })}>
-                          {label(tab, i)}
+                        <Num className={style.num} label={mark === "·" ? "" : fmt(t.tournament.pairLabel, { n: mark })}>
+                          {mark}
                         </Num>
                         <span className="min-w-0 text-[15px] font-medium">
                           {a} <span className={style.sub}>/</span> {b}
@@ -135,6 +143,7 @@ export function TeamSection({
           })}
         </div>
       {tab === "special" && <p className="mt-2 text-xs text-muted">{t.tournament.specialNote}</p>}
+      {tab === "pairs" && !draw && <p className="mt-2 text-xs text-muted">{t.tournament.drawPending}</p>}
       {tab === "rankings" && <p className="mt-2 text-xs text-muted">{t.tournament.pointsRule}</p>}
     </>
   );
@@ -206,8 +215,6 @@ function PlayerMatches({
     </div>
   );
 }
-
-const label = (tab: Tab, i: number) => (tab === "pairs" ? String.fromCharCode(65 + i) : String(i + 1));
 
 function Num({ className, label, children }: { className: string; label: string; children: string | number }) {
   return (

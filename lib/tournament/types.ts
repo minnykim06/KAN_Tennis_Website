@@ -1,3 +1,5 @@
+import type { PairDraw } from "./fall-2026";
+
 /** pair = 고정 페어 match (3 per pair), special = 스페셜 페어 match (set matchups, 1 each). */
 export type TournamentMatchKind = "pair" | "special";
 export type TournamentMatchStatus = "scheduled" | "in_progress" | "final";
@@ -23,6 +25,8 @@ export type TournamentMatch = {
   /** Games per side; both or neither. */
   score1: number | null;
   score2: number | null;
+  /** 고정 페어 only: which of the 15 scheduled matches (1–15, see PAIR_SCHEDULE). */
+  slot: number | null;
   created_at: string;
 };
 
@@ -34,6 +38,10 @@ export type TournamentData = {
   ended: boolean;
   /** False until migration 0007 has been run: the end button can't be used yet. */
   canEnd: boolean;
+  /** The 제비뽑기: letter → pair per team, or null before the draw is entered. */
+  draw: PairDraw | null;
+  /** False until migration 0008 has been run: the draw can't be entered yet. */
+  canDraw: boolean;
 };
 
 export const side1 = (m: TournamentMatch) => [m.side1_a, m.side1_b];

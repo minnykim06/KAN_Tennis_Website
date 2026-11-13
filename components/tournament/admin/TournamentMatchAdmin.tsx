@@ -17,7 +17,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { button, input, label } from "@/components/ui/styles";
 import { useI18n } from "@/lib/i18n/client";
-import { PAIRS, PARTICIPANTS, TEAMS, getParticipant, partnerFor } from "@/lib/tournament/fall-2026";
+import { PAIRS, PARTICIPANTS, TEAMS, getPair, getParticipant, partnerFor } from "@/lib/tournament/fall-2026";
 import type { TournamentMatch, TournamentMatchKind } from "@/lib/tournament/types";
 import type { MatchResult } from "@/lib/types";
 
@@ -29,32 +29,11 @@ type Slot = (typeof SLOTS)[number];
 const PARTNER: Record<Slot, Slot> = { side1_a: "side1_b", side1_b: "side1_a", side2_a: "side2_b", side2_b: "side2_a" };
 const NO_BUSY = new Set<string>();
 
+/** "Aidan Jang / 이재선": a player's fixed pair. */
+const pairNames = (participantId: string) =>
+  getPair(getParticipant(participantId)?.pairId ?? "")?.members.map((m) => m.name).join(" / ") ?? "?";
+
 const RESULT: Record<string, MatchResult> = { side1: "player1_win", side2: "player2_win", draw: "draw" };
-
-/** "+ Add match" button that opens the form below the match list, starting on the open tab's type. */
-export function AddTournamentMatch({ kind }: { kind: TournamentMatchKind }) {
-  const { t } = useI18n();
-  const [open, setOpen] = useState(false);
-  const [formKey, setFormKey] = useState(0);
-
-  if (!open) {
-    return (
-      <button type="button" onClick={() => setOpen(true)} className={`${button.small} mt-3`}>
-        + {t.mod.addMatch}
-      </button>
-    );
-  }
-  return (
-    <TournamentMatchForm
-      key={formKey}
-      initialKind={kind}
-      onDone={() => {
-        setFormKey((k) => k + 1);
-        setOpen(false);
-      }}
-    />
-  );
-}
 
 /** "Enter result" for signed-in members, like game day's ScoreEntry. */
 export function TournamentScoreEntry({ match }: { match: TournamentMatch }) {
@@ -141,13 +120,16 @@ export function TournamentMatchAdmin({ match }: { match: TournamentMatch }) {
           <button type="button" onClick={() => setMode("edit")} className={button.small}>
             {t.mod.editMatch}
           </button>
-          <DeleteButton
-            action={deleteTournamentMatch}
-            id={match.id}
-            label={t.mod.deleteMatch}
-            confirmText={t.mod.confirmDeleteMatch}
-            variant="smallDanger"
-          />
+          {/* Matches from the draw: change the draw instead of deleting them. */}
+          {match.slot === null && (
+            <DeleteButton
+              action={deleteTournamentMatch}
+              id={match.id}
+              label={t.mod.deleteMatch}
+              confirmText={t.mod.confirmDeleteMatch}
+              variant="smallDanger"
+            />
+          )}
         </>
       )}
       {progress.state && !progress.state.ok && (
@@ -264,9 +246,18 @@ function TournamentMatchForm({
           {SLOTS.map((slot) => (
             <input key={slot} type="hidden" name={slot} value={picked[slot]} />
           ))}
-          {pairSelect(1)}
-          <span className="text-center text-xs uppercase text-muted sm:pb-3">{t.common.vs}</span>
-          {pairSelect(2)}
+          {match?.slot != null ? (
+            // From the draw: pairs are fixed here (change the draw to move them); only time and court.
+            <p className="text-[15px] font-medium text-ink sm:col-span-3">
+              {pairNames(match.side1_a)} <span className="text-muted">{t.common.vs}</span> {pairNames(match.side2_a)}
+            </p>
+          ) : (
+            <>
+              {pairSelect(1)}
+              <span className="text-center text-xs uppercase text-muted sm:pb-3">{t.common.vs}</span>
+              {pairSelect(2)}
+            </>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">

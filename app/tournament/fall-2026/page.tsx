@@ -50,7 +50,7 @@ export default async function Fall2026TournamentPage() {
 
       <section aria-labelledby="teams" className="mb-10">
         <h2 id="teams" className={sectionTitle}>{t.tournament.teamsTitle}</h2>
-        <TeamSection teamNames={teamNames} rankings={rankPlayersByTeam(data.matches)} teamPoints={teamPoints} matches={data.matches} />
+        <TeamSection teamNames={teamNames} rankings={rankPlayersByTeam(data.matches)} teamPoints={teamPoints} matches={data.matches} draw={data.draw} />
       </section>
 
       <section aria-labelledby="matches">
@@ -61,6 +61,8 @@ export default async function Fall2026TournamentPage() {
           lang={lang}
           canEdit={isModerator && data.ready}
           canScore={!!player && data.ready && (!data.ended || isModerator)}
+          draw={data.draw}
+          canDraw={data.canDraw}
         />
       </section>
     </div>

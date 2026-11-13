@@ -8,11 +8,13 @@ import { useI18n } from "@/lib/i18n/client";
 import { formatTime } from "@/lib/time";
 import {
   PAIR_MATCHES_PER_PAIR,
+  PAIR_SCHEDULE,
   PARTICIPANTS,
   PLANNED_PAIR_MATCHES,
   SPECIAL_MATCHES,
   TEAMS,
   getParticipant,
+  type PairDraw as PairDrawData,
   type TeamId,
 } from "@/lib/tournament/fall-2026";
 import {
@@ -24,7 +26,8 @@ import {
   type TournamentMatchKind,
 } from "@/lib/tournament/types";
 import { TeamMark } from "./TeamCards";
-import { AddTournamentMatch, TournamentMatchAdmin, TournamentScoreEntry } from "./admin/TournamentMatchAdmin";
+import { PairDraw } from "./admin/PairDraw";
+import { TournamentMatchAdmin, TournamentScoreEntry } from "./admin/TournamentMatchAdmin";
 
 /** 대진·결과, split into a 고정 페어 tab and a 스페셜 페어 tab. */
 export function MatchBoard({
@@ -33,10 +36,16 @@ export function MatchBoard({
   lang,
   canEdit,
   canScore,
+  draw,
+  canDraw,
 }: {
   matches: TournamentMatch[];
   teamNames: Record<TeamId, string>;
   lang: Lang;
+  /** The 제비뽑기, or null before it's entered. */
+  draw: PairDrawData | null;
+  /** Migration 0008 run: moderators can enter the draw. */
+  canDraw: boolean;
   /** Moderator: add, edit and delete matches. */
   canEdit: boolean;
   /** Any signed-in player: enter results, like game day. */
@@ -46,7 +55,10 @@ export function MatchBoard({
   const [kind, setKind] = useState<TournamentMatchKind>("pair");
   const [player, setPlayer] = useState("");
 
-  const ofKind = matches.filter((m) => m.kind === kind);
+  // 고정 페어 matches from the draw in schedule order (1–15).
+  const ofKind = matches
+    .filter((m) => m.kind === kind)
+    .sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));
   const visible = ofKind.filter((m) => !player || tournamentMatchPlayers(m).includes(player));
 
   const tabLabel: Record<TournamentMatchKind, string> = {
@@ -121,7 +133,7 @@ export function MatchBoard({
           </>
         )}
         {/* 스페셜 페어 matchups are set in advance (migration 0006), so only 고정 페어 can be added. */}
-        {canEdit && kind === "pair" && <AddTournamentMatch kind="pair" />}
+        {canEdit && kind === "pair" && <PairDraw draw={draw} canDraw={canDraw} />}
       </div>
     </>
   );
@@ -157,6 +169,12 @@ function TournamentMatchRow({
   return (
     <li className="rounded-xl border border-green-line bg-surface px-3 py-3 sm:px-4">
       <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+        {match.slot !== null && (
+          <span className="font-semibold text-ink">
+            {fmt(t.tournament.matchNo, { n: match.slot })} ·{" "}
+            {fmt(t.tournament.matchLetters, { b: PAIR_SCHEDULE[match.slot - 1][0], w: PAIR_SCHEDULE[match.slot - 1][1] })}
+          </span>
+        )}
         <span className={`rounded-full px-2 py-0.5 text-[11px] ${status.cls}`}>{status.text}</span>
         {match.start_time && <span>{formatTime(match.start_time, lang)}</span>}
         {match.court && <span>{fmt(t.tournament.court, { court: match.court })}</span>}
