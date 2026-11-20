@@ -152,3 +152,21 @@ export function letterOf(draw: PairDraw | null, pairId: string): Letter | undefi
   if (!draw || !teamId) return undefined;
   return LETTERS.find((l) => draw[teamId][l] === pairId);
 }
+
+// --- Times and courts (11/20 schedule) ---------------------------------------
+// Start time ("HH:MM") and court of each scheduled match, by match number:
+// 1–15 are the 고정 페어 slots (applied when the draw creates them), 16–20 the
+// 스페셜 페어 matchups in SPECIAL_MATCHUPS order.
+
+export type MatchPlace = { start_time: string; court: string };
+
+const place = (start_time: string, court: number): MatchPlace => ({ start_time, court: `뮤어 ${court}` });
+
+export const MATCH_PLACES: MatchPlace[] = [
+  place("17:30", 1), place("17:30", 2), place("17:30", 3),
+  place("18:00", 1), place("18:00", 2), place("18:00", 3), place("18:00", 4),
+  place("18:30", 1), place("18:30", 2), place("18:30", 3), place("18:30", 4),
+  place("19:00", 1), place("19:00", 2), place("19:00", 3), place("19:00", 4),
+  place("19:30", 1), place("19:30", 2), place("19:30", 3), place("19:30", 4),
+  place("20:00", 2),
+];

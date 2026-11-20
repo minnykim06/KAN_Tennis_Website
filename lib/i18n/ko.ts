@@ -102,7 +102,7 @@ export const ko = {
   tournament: {
     title: "2026 가을학기 대회",
     subtitle: "흑백전",
-    date: "11월 20일 금요일 · 예정",
+    date: "11월 20일 금요일",
     dateEnded: "11월 20일 금요일 · 종료",
     scoreTitle: "현재 스코어",
     scoreFinal: "최종 스코어",

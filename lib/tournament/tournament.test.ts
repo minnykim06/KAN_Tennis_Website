@@ -106,3 +106,12 @@ describe("points", () => {
     expect(white["W2-1"]).toMatchObject({ points: 1, gameDiff: -4, rank: 3 });
   });
 });
+
+describe("match places", () => {
+  it("has a time and court for all 20 matches", async () => {
+    const { MATCH_PLACES, SPECIAL_MATCHES } = await import("./fall-2026");
+    expect(MATCH_PLACES).toHaveLength(PLANNED_PAIR_MATCHES + SPECIAL_MATCHES);
+    expect(MATCH_PLACES[0]).toEqual({ start_time: "17:30", court: "뮤어 1" });
+    expect(MATCH_PLACES[19]).toEqual({ start_time: "20:00", court: "뮤어 2" });
+  });
+});

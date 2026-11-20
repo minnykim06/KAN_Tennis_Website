@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { getCurrentPlayer, getModerator } from "@/lib/auth/session";
 import {
   LETTERS,
+  MATCH_PLACES,
   PAIR_SCHEDULE,
   TEAMS,
   TOURNAMENT_ID,
@@ -239,7 +240,7 @@ export async function savePairDraw(_prev: Prev, formData: FormData): Promise<Act
   if (missing.length > 0) {
     const { error } = await db()
       .from("tournament_matches")
-      .insert(missing.map((p) => ({ tournament_id: TOURNAMENT_ID, kind: "pair", ...p })));
+      .insert(missing.map((p) => ({ tournament_id: TOURNAMENT_ID, kind: "pair", ...p, ...MATCH_PLACES[p.slot - 1] })));
     if (error) return fail(error)!;
   }
   return done();

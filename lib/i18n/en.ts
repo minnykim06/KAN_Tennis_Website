@@ -103,7 +103,7 @@ export const en: Dictionary = {
   tournament: {
     title: "2026 Fall Tournament",
     subtitle: "Black vs White",
-    date: "Friday, Nov 20 · Planned",
+    date: "Friday, Nov 20",
     dateEnded: "Friday, Nov 20 · Finished",
     scoreTitle: "Current score",
     scoreFinal: "Final score",
