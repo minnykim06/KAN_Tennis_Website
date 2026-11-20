@@ -39,18 +39,18 @@ export const PAIR_MATCHES_PER_PAIR = 3;
 
 const ROSTER: Record<TeamId, [string, string][]> = {
   black: [
-    ["Aidan Jang", "이재선"],
-    ["이지윤", "이민준"],
-    ["정재용", "한지훈"],
     ["William Pechkis", "주현우"],
-    ["Victor Kim", "장유진"],
+    ["Aidan Jang", "이재선"],
+    ["손준영", "이동진"],
+    ["이지윤", "이민준"],
+    ["정재용", "장유진"],
   ],
   white: [
     ["김민성", "이단비"],
-    ["김주현", "도정현"],
-    ["김민서", "김호준"],
-    ["손준영", "이동진"],
-    ["박승비", "홍우진"],
+    ["박승비", "김주현"],
+    ["Victor Kim", "김호준"],
+    ["한지훈", "홍우진"],
+    ["김민서", "이하민"],
   ],
 };
 
@@ -80,7 +80,8 @@ export const isParticipantId = (id: string) => participantById.has(id);
 
 // --- 스페셜 페어 -------------------------------------------------------------
 // Set matchups: one 흑팀 special pair vs one 백팀 special pair, 1 match each.
-// Seeded as matches by supabase/migrations/0006_special_pairs.sql (same ids).
+// Seeded as matches by supabase/migrations/0006_special_pairs.sql, replaced by
+// 0009_new_roster.sql (same ids).
 
 export type SpecialMatchup = {
   id: string;
@@ -90,11 +91,11 @@ export type SpecialMatchup = {
 };
 
 export const SPECIAL_MATCHUPS: SpecialMatchup[] = [
-  { id: "S1", black: ["B4-1", "B5-1"], white: ["W1-1", "W3-1"] }, // William Pechkis / Victor Kim vs 김민성 / 김민서
-  { id: "S2", black: ["B1-1", "B2-1"], white: ["W5-1", "W4-1"] }, // Aidan Jang / 이지윤 vs 박승비 / 손준영
-  { id: "S3", black: ["B5-2", "B4-2"], white: ["W2-1", "W1-2"] }, // 장유진 / 주현우 vs 김주현 / 이단비
-  { id: "S4", black: ["B3-1", "B1-2"], white: ["W2-2", "W5-2"] }, // 정재용 / 이재선 vs 도정현 / 홍우진
-  { id: "S5", black: ["B3-2", "B2-2"], white: ["W4-2", "W3-2"] }, // 한지훈 / 이민준 vs 이동진 / 김호준
+  { id: "S1", black: ["B1-1", "B3-1"], white: ["W1-1", "W5-1"] }, // William Pechkis / 손준영 vs 김민성 / 김민서
+  { id: "S2", black: ["B2-1", "B4-1"], white: ["W2-1", "W3-1"] }, // Aidan Jang / 이지윤 vs 박승비 / Victor Kim
+  { id: "S3", black: ["B5-2", "B3-2"], white: ["W2-2", "W1-2"] }, // 장유진 / 이동진 vs 김주현 / 이단비
+  { id: "S4", black: ["B5-1", "B2-2"], white: ["W4-1", "W3-2"] }, // 정재용 / 이재선 vs 한지훈 / 김호준
+  { id: "S5", black: ["B4-2", "B1-2"], white: ["W4-2", "W5-2"] }, // 이민준 / 주현우 vs 홍우진 / 이하민
 ];
 
 export const SPECIAL_MATCHES = SPECIAL_MATCHUPS.length;

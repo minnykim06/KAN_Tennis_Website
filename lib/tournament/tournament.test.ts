@@ -17,8 +17,8 @@ describe("fall 2026 roster", () => {
   it("keeps the announced fixed pairs", () => {
     const pairs = TEAMS.map((team) => team.pairs.map((p) => p.members.map((x) => x.name).join(" / ")));
     expect(pairs).toEqual([
-      ["Aidan Jang / 이재선", "이지윤 / 이민준", "정재용 / 한지훈", "William Pechkis / 주현우", "Victor Kim / 장유진"],
-      ["김민성 / 이단비", "김주현 / 도정현", "김민서 / 김호준", "손준영 / 이동진", "박승비 / 홍우진"],
+      ["William Pechkis / 주현우", "Aidan Jang / 이재선", "손준영 / 이동진", "이지윤 / 이민준", "정재용 / 장유진"],
+      ["김민성 / 이단비", "박승비 / 김주현", "Victor Kim / 김호준", "한지훈 / 홍우진", "김민서 / 이하민"],
     ]);
   });
 });
@@ -27,11 +27,11 @@ describe("special pairs", () => {
   it("are the five set matchups, 흑팀 vs 백팀, everyone once", () => {
     const name = (id: string) => PARTICIPANTS.find((p) => p.id === id)!.name;
     expect(SPECIAL_MATCHUPS.map((m) => `${m.black.map(name).join(" / ")} vs ${m.white.map(name).join(" / ")}`)).toEqual([
-      "William Pechkis / Victor Kim vs 김민성 / 김민서",
-      "Aidan Jang / 이지윤 vs 박승비 / 손준영",
-      "장유진 / 주현우 vs 김주현 / 이단비",
-      "정재용 / 이재선 vs 도정현 / 홍우진",
-      "한지훈 / 이민준 vs 이동진 / 김호준",
+      "William Pechkis / 손준영 vs 김민성 / 김민서",
+      "Aidan Jang / 이지윤 vs 박승비 / Victor Kim",
+      "장유진 / 이동진 vs 김주현 / 이단비",
+      "정재용 / 이재선 vs 한지훈 / 김호준",
+      "이민준 / 주현우 vs 홍우진 / 이하민",
     ]);
     const all = SPECIAL_MATCHUPS.flatMap((m) => [...m.black, ...m.white]);
     expect(new Set(all).size).toBe(20);
@@ -40,8 +40,8 @@ describe("special pairs", () => {
 
   it("knows partners per match type", () => {
     expect(partnerFor("pair", "B4-1")).toBe("B4-2");
-    expect(partnerFor("special", "B4-1")).toBe("B5-1");
-    expect(isPairOf("special", "W3-1", "W1-1")).toBe(true);
+    expect(partnerFor("special", "B4-1")).toBe("B2-1");
+    expect(isPairOf("special", "W3-1", "W2-1")).toBe(true);
     expect(isPairOf("special", "B4-1", "B4-2")).toBe(false);
     expect(isPairOf("pair", "B4-1", "B4-2")).toBe(true);
   });
